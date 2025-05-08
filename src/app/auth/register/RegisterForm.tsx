@@ -1,0 +1,11 @@
+'use client'
+
+import { useState } from 'react';
+
+export default function RegisterForm() {
+    return (
+        <div>
+            Register
+        </div>
+    )
+}
