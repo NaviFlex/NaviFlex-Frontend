@@ -89,7 +89,7 @@ export default function LoginForm() {
 
                     <p className="text-sm text-center text-white mt-4">
                         ¿Aún no tienes una cuenta?{' '}
-                        <a href="/auth/register" className="underline font-medium hover:text-yellow-200 transition">
+                        <a href="/auth/register/email" className="underline font-medium hover:text-yellow-200 transition">
                             Regístrate
                         </a>
                     </p>
