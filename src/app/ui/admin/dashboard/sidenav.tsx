@@ -1,9 +1,13 @@
+'use client'
 //import Link from 'next/link';
 import NavLinks from './nav-links';
 //import AcmeLogo from '@/app/ui/acme-logo';
 import { ArrowRightStartOnRectangleIcon ,UserCircleIcon } from '@heroicons/react/24/outline';
+import {useRouter} from "next/navigation";
+
 
 export default function SideNav() {
+  const router = useRouter();
   return (
     <div className="flex h-full flex-col bg-indigo-300 text-indigo-900 p-4 rounded-r-2xl w-60">
         {/* Perfil */}
@@ -20,8 +24,11 @@ export default function SideNav() {
         <hr className="border-indigo-200 my-4 mt-auto" />
 
         {/* Cerrar sesión */}
-        <button className="flex items-center gap-2 text-sm text-indigo-700 hover:text-white transition-all">
-            <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+        <button
+            onClick={() => router.push('/auth/login')}
+            className="flex items-center gap-2 text-sm text-indigo-700 hover:text-white transition-all"
+        >
+            <ArrowRightStartOnRectangleIcon className="h-5 w-5"/>
             Cerrar sesión
         </button>
     </div>

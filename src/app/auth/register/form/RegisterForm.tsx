@@ -64,7 +64,7 @@ export default function RegisterForm() {
                 return
             }
 
-            router.push('/auth/login')
+            router.push('/admin/dashboard/drivers')
         } catch {
             setError('Error de red o servidor')
         } finally {
