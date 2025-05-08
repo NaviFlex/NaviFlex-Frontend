@@ -2,6 +2,9 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import styles from '../../../ui/auth/login/login.module.css'
+import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay';
+ 
 
 export default function VerifyCodeForm() {
     const [code, setCode] = useState(['', '', '', '', '', ''])
@@ -9,6 +12,13 @@ export default function VerifyCodeForm() {
     const [loading, setLoading] = useState(false)
     const inputsRef = useRef<HTMLInputElement[]>([])
     const router = useRouter()
+
+    const [showError, setShowError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const [successMessage, setSuccessMessage] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
+
 
     const handleChange = (index: number, value: string) => {
         const clean = value.replace(/\D/g, '').slice(0, 1)
@@ -23,13 +33,12 @@ export default function VerifyCodeForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        setError('')
 
         const fullCode = code.map(c => c.trim()).join('').replace(/\D/g, '')
-        console.log('📤 Código a enviar:', fullCode)
+   
 
         if (fullCode.length !== 6) {
-            setError('El código debe tener 6 dígitos.')
+            setErrorMessage('El código debe tener 6 dígitos.')
             return
         }
 
@@ -43,35 +52,74 @@ export default function VerifyCodeForm() {
             })
 
             if (!res.ok) {
-                setError('Código incorrecto.')
+                setErrorMessage('Código incorrecto.')
+                setShowError(true);
+                setTimeout(() => setShowError(false), 3000);
                 return
             }
 
             router.push('/auth/register/form')
         } catch {
             setError('Error de red o servidor.')
+            setShowError(true);
+            setTimeout(() => setShowError(false), 3000);
         } finally {
             setLoading(false)
         }
     }
 
+    const handleResendCode = async () => {
+        try {
+
+      
+          setSuccessMessage('Se ha reenviado un nuevo código a tu correo.');
+          setShowSuccess(true);
+          setTimeout(() => setShowSuccess(false), 3000);
+        } catch {
+            setErrorMessage('No se pudo reenviar el código.');
+          setShowError(true);
+          setTimeout(() => setShowError(false), 3000);
+        }
+      };
+      
+
     return (
+        <>
+
+            <ErrorOverlay
+                message={errorMessage}
+                show={showError}
+                type='error'
+                onClose={() => setShowError(false)}
+            />
+              <ErrorOverlay
+                message={successMessage}
+                show={showSuccess}
+                type="success"
+                onClose={() => setShowSuccess(false)}
+            />
+            
         <div
-            className="flex min-h-screen items-center justify-center bg-cover bg-center"
-            style={{ backgroundImage: "url('/bg-map.jpg')" }}
+        className={styles.container_principale}
+        
         >
+        <div className={styles.container_secondary}>
+            <div className={styles.container_send_email }>
             <form
                 onSubmit={handleSubmit}
-                className="bg-indigo-400 bg-opacity-90 p-10 rounded-2xl w-[320px] space-y-6 shadow-xl"
+                className="bg-indigo-400 bg-opacity-90 p-10 rounded-2xl w-[390px] space-y-6 shadow-xl m-10"
             >
-                <h1 className="text-2xl font-semibold text-white text-center">Ingresa el código</h1>
-                <p className="text-white text-sm text-center">
-                    Te llegó un código de verificación en el correo ingresado anteriormente.
-                </p>
+                <div className="flex flex-col items-start w-[270px] gap-3">
 
-                {error && <p className="text-red-100 text-sm text-center">{error}</p>}
+                    <h1 className="text-2xl font-semibold text-white text-start">Ingresa el código que te enviamos por e-mail</h1>
+                    <p className="text-white text-sm text-start">
+                        Te llegó un código de verificación en el correo ingresado anteriormente.
 
-                <div className="flex justify-center gap-3">
+                    </p>
+                </div>
+
+
+                <div className="flex justify-center gap-3 mt-10 mb-10 pr-10 pl-10">
                     {code.map((digit, i) => (
                         <input
                             key={i}
@@ -81,33 +129,41 @@ export default function VerifyCodeForm() {
                             type="tel"
                             maxLength={1}
                             inputMode="numeric"
-                            className="w-10 h-12 text-center text-xl rounded-lg border border-white bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
+                            className="w-10 h-12 text-center text-xl rounded-lg border border-white bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white transition duration-300"
                             value={digit}
                             onChange={(e) => handleChange(i, e.target.value)}
                         />
                     ))}
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={loading || code.join('').length < 6}
-                    className={`w-full font-medium py-2 rounded-xl transition duration-200 ${
-                        code.join('').length === 6 && !loading
-                            ? 'bg-white text-indigo-600 hover:bg-indigo-500 hover:text-white'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                >
-                    {loading ? 'Verificando...' : 'Confirmar código'}
-                </button>
+                    <div className="flex flex-col justify-center items-center w-full gap-4">
 
-                <button
-                    type="button"
-                    onClick={() => router.push('/auth/register/email')}
-                    className="w-full bg-indigo-600 text-white py-2 rounded-xl hover:bg-indigo-700 transition"
-                >
-                    Volver
-                </button>
+                        <button
+                            type="submit"
+                            disabled={loading || code.join('').length < 6}
+                            className={`w-65 h-[44px] text-sm font-medium  py-2 rounded-[12px] transition duration-500  cursor-pointer ${
+                                code.join('').length === 6 && !loading
+                                    ? 'bg-white text-indigo-600 hover:bg-indigo-500 hover:text-white'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                            >
+                            {loading ? 'Verificando...' : 'Confirmar código'}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleResendCode}
+                            className="w-65 h-[44px] text-sm bg-[#5E52FF] font-medium text-white py-2 rounded-[12px] hover:bg-indigo-700 transition duration-500  cursor-pointer"
+                        >
+                            Reenviar codigo
+                        </button>
+                    </div>
             </form>
+            </div>
+        
+
         </div>
+    </div>
+    </>
     )
 }

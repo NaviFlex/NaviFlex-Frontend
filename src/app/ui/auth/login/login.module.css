@@ -1,0 +1,56 @@
+.container_principale {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #7284fb;
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.container_secondary {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  background-image: url("/bg-map.jpg");
+  background-size: cover;
+  background-position: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.container_form {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding-right: 6rem;
+  height: 100vh;
+  width: 100%;
+}
+.container_send_email {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 100vh;
+}
+.container_register_admin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: 100vh;
+  padding: 50px;
+}
+
+@media (max-width: 640px) {
+  .container_form {
+    justify-content: center;
+    padding-right: 0;
+  }
+}
