@@ -1,5 +1,8 @@
 'use client'
 
+import { UserIcon } from '@heroicons/react/24/outline'
+import { useRouter } from 'next/navigation'
+
 type Driver = {
     id: string
     nombre: string
@@ -13,9 +16,11 @@ const mockDrivers: Driver[] = [
 ]
 
 export default function ListDrivers() {
+    const router = useRouter()
+
     return (
         <div className="w-full h-full rounded-[12px] bg-white">
-            <div className="bg-white rounded-2xl shadow-lg w-full h-full  min-h-[80vh] p-6 relative">
+            <div className="bg-white rounded-2xl shadow-lg w-full h-full min-h-[80vh] p-6 relative">
                 <h1 className="text-xl font-semibold text-[#7284FB] mb-2">
                     Listado de choferes/unidades
                 </h1>
@@ -27,7 +32,9 @@ export default function ListDrivers() {
                             key={driver.id}
                             className="flex flex-col items-center bg-[#7284FB] text-white rounded-xl p-4 shadow-md w-full max-w-[200px] mx-auto"
                         >
-                            <div className="text-4xl mb-2">👤</div>
+                            <div className="text-4xl mb-2">
+                                <UserIcon className="h-15 w-15 text-white" />
+                            </div>
 
                             <div className="font-semibold text-sm">{driver.nombre}</div>
                             <div className="text-xs mt-1 mb-2">Placa de Und: {driver.placa}</div>
@@ -40,7 +47,10 @@ export default function ListDrivers() {
                 </div>
 
                 <div className="absolute bottom-6 right-6">
-                    <button className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-2xl">
+                    <button
+                        onClick={() => router.push('/admin/dashboard/drivers/newdriver')}
+                        className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-2xl"
+                    >
                         +
                     </button>
                 </div>
