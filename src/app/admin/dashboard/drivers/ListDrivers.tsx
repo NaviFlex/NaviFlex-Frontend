@@ -14,8 +14,8 @@ const mockDrivers: Driver[] = [
 
 export default function ListDrivers() {
     return (
-        <div className="min-h-screen bg-[#7284FB] flex justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-lg w-full max-w-6xl min-h-[80vh] p-6 relative">
+        <div className="w-full h-full rounded-[12px] bg-white">
+            <div className="bg-white rounded-2xl shadow-lg w-full h-full  min-h-[80vh] p-6 relative">
                 <h1 className="text-xl font-semibold text-[#7284FB] mb-2">
                     Listado de choferes/unidades
                 </h1>

@@ -1,35 +1,25 @@
 'use client'
 import {
-  TruckIcon,
-  UsersIcon,
-  CurrencyDollarIcon,
-  ClipboardDocumentListIcon
-} from '@heroicons/react/24/outline';
+    UsersIcon ,
+    MapIcon,
+  } from '@heroicons/react/24/outline';
+  
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 
 const links = [
   {
-    name: 'Choferes',
-    href: '/admin/dashboard/drivers',
-    icon: TruckIcon,
+    name: 'Cartera de clientes',
+    href: '/pre-salesmans/dashboard/client-portfolio',
+    icon: UsersIcon ,
   },
   {
-    name: 'Prevendedor',
-    href: '/admin/dashboard/salesman',
-    icon: UsersIcon,
+    name: 'Jornada diaria',
+    href: '/pre-salesmans/dashboard/daily-working-hours',
+    icon: MapIcon,
   },
-  {
-    name: 'Clientes',
-    href: '/admin/dashboard/clients',
-    icon: CurrencyDollarIcon,
-  },
-  {
-    name: 'Incidencias',
-    href: '/admin/dashboard/incidents',
-    icon: ClipboardDocumentListIcon,
-  },
+
 ]
 
 

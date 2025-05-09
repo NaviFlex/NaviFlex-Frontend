@@ -1,5 +1,5 @@
-import SideNav from "../../ui/admin/dashboard/sidenav";
-export default function DashboardAdminLayout({
+import SideNav from "../../ui/drivers/dashboard/sidenav";
+export default function DashboardDriversLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -10,7 +10,7 @@ export default function DashboardAdminLayout({
         <div className="w-full h-full flex-none md:w-64  ">
           <SideNav />
         </div>
-        <div className="w-full h-full flex-grow md:overflow-y-auto">
+        <div className="w-full h-full flex-grow md:overflow-y-auto ">
           
           {children}
           </div>

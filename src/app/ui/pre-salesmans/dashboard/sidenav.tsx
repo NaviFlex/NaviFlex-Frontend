@@ -1,7 +1,5 @@
 'use client'
-//import Link from 'next/link';
 import NavLinks from './nav-links';
-//import AcmeLogo from '@/app/ui/acme-logo';
 import { ArrowRightStartOnRectangleIcon ,UserCircleIcon } from '@heroicons/react/24/outline';
 import {useRouter} from "next/navigation";
 
@@ -14,13 +12,13 @@ export default function SideNav() {
         <div className="flex gap-3 items-center mb-5">
             <UserCircleIcon className="h-25 w-25 text-[#5E52FF]" />
             <div className="flex flex-col items-start w-35 ">
-                <span className="mt-2 text-[15px]  font-bold text-[#5E52FF]">Administrador</span>
-                <span className="mt-1 text-sm font-medium text-[#000000FF]">Arturo Cueva</span>
-                <span className=" text-[10px] font-medium text-[#000000FF]">admin@gmail.com</span>
+                <span className="mt-2 text-[15px]  font-bold text-[#5E52FF]">Prevendedor</span>
+                <span className="mt-1 text-sm font-medium text-[#000000FF]">Enrique Gallardo</span>
+                <span className=" text-[10px] font-medium text-[#000000FF]">prevendedor1@gmail.com</span>
             </div>
         </div>
 
-        <hr className="border-t-2 border-indigo-200 mb-4" />
+        <hr className="border-indigo-200 mb-4" />
 
             {/* Aquí va NavLinks */}
             <NavLinks />
