@@ -1,0 +1,53 @@
+[
+  {
+    "nombres": "sdfsdf",
+    "apellidos": "sfsdfs",
+    "empresa": "dfsdfsd",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "324543",
+    "contrasena": "dsfsf",
+    "correo": "josue12345@gmail.com",
+    "rol": "admin"
+  },
+  {
+    "id": "12",
+    "nombre": "asd",
+    "apellidos": "asdas",
+    "correo": "prevendedor1@gmail.com",
+    "contrasena": "asdas",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "324543",
+    "zonaAsignada": "Norte",
+    "rol": "prevendedor"
+  },
+  {
+    "nombre": "asdasd",
+    "apellidos": "asdasd",
+    "correo": "chofer1@gmail.com",
+    "contrasena": "sadsad",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "73114408",
+    "placa": "sadasd",
+    "rol": "chofer"
+  },
+  {
+    "nombre": "asdas",
+    "apellidos": "sdasd",
+    "correo": "chofer2@gmail.com",
+    "contrasena": "sdasd",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "342342",
+    "placa": "asda",
+    "rol": "chofer"
+  },
+  {
+    "nombre": "asdad",
+    "apellidos": "asdasdasd",
+    "correo": "chofer3@gmail.com",
+    "contrasena": "asdasd",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "234235",
+    "placa": "asdsa",
+    "rol": "chofer"
+  }
+]

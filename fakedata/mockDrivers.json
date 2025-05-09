@@ -29,5 +29,15 @@
     "numeroDocumento": "73114408",
     "placa": "dasdas",
     "role": "chofer"
+  },
+  {
+    "nombre": "asdsada",
+    "apellidos": "dasdas",
+    "correo": "dasdas",
+    "contrasena": "dasda",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "73114408",
+    "placa": "asdas",
+    "role": "chofer"
   }
 ]

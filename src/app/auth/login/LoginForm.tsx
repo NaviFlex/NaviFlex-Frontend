@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import styles from '../../ui/auth/login/login.module.css'
 import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay';
+import { useRouter } from 'next/navigation';
 
 
 export default function LoginForm() {
@@ -15,40 +16,61 @@ export default function LoginForm() {
     const [showError, setShowError] = useState(false);
 
 
+    const router = useRouter();
+
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setError('')
-
-        if (!camposCompletos) {
-            setError('Todos los campos son obligatorios.')
-            return
+      e.preventDefault();
+      setError('');
+    
+      if (!camposCompletos) {
+        setError('Todos los campos son obligatorios.');
+        return;
+      }
+    
+      setLoading(true);
+    
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          body: JSON.stringify({ usuario, contrasena }),
+          headers: { 'Content-Type': 'application/json' },
+        });
+    
+        const result = await res.json();
+    
+        if (!res.ok || !result.ok) {
+          setError('Credenciales incorrectas');
+          setShowError(true);
+          setTimeout(() => setShowError(false), 3000);
+          return;
         }
-
-        setLoading(true)
-
-        try {
-            const res = await fetch('/api/login', {
-              method: 'POST',
-              body: JSON.stringify({ usuario, contrasena }),
-              headers: { 'Content-Type': 'application/json' },
-            });
-      
-            if (!res.ok) {
-              setError('Credenciales incorrectas');
-              setShowError(true);
-              setTimeout(() => setShowError(false), 3000);
-              return;
-            }
-      
-            window.location.href = '/admin/dashboard/drivers';
-          } catch (err) {
-            setError('Error del servidor. Intenta nuevamente.');
+    
+        // Redirige según el rol usando router
+        switch (result.rol) {
+          case 'admin':
+            router.push('/admin/dashboard/drivers');
+            break;
+          case 'chofer':
+            router.push('/drivers/dashboard/daily-working-hours');
+            break;
+          case 'prevendedor':
+            router.push('/pre-salesmans/dashboard/daily-working-hours');
+            break;
+          default:
+            setError('Rol no reconocido');
             setShowError(true);
             setTimeout(() => setShowError(false), 3000);
-          } finally {
-            setLoading(false);
-          }
-    }
+        }
+    
+      } catch (err) {
+        setError('Error del servidor. Intenta nuevamente.');
+        setShowError(true);
+        setTimeout(() => setShowError(false), 3000);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
 
     return (
         <>

@@ -2,21 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
 
-const filePath = path.join(process.cwd(), 'fakedata', 'mockDrivers.json');
+const filePath = path.join(process.cwd(), 'fakedata', 'users.json');
 
 export async function POST(req: NextRequest) {
   try {
-    const nuevoChofer = await req.json();
+    const newDriver = await req.json();
 
     // Leer archivo actual
     const data = await fs.readFile(filePath, 'utf-8');
-    const choferes = JSON.parse(data);
+    const drivers = JSON.parse(data);
 
     // Agregar nuevo chofer
-    choferes.push(nuevoChofer);
-
+    drivers.push(newDriver);
+    
     // Guardar nuevamente
-    await fs.writeFile(filePath, JSON.stringify(choferes, null, 2), 'utf-8');
+    await fs.writeFile(filePath, JSON.stringify(drivers, null, 2), 'utf-8');
 
     return NextResponse.json({ ok: true, message: 'Chofer guardado correctamente' });
   } catch (error) {

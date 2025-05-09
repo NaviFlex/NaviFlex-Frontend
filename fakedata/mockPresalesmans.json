@@ -1,0 +1,45 @@
+[
+  {
+    "id": "1",
+    "nombre": "Luis",
+    "apellidos": "González Romero",
+    "correo": "luis.gonzalez@example.com",
+    "contrasena": "clave123",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "70865432",
+    "zonaAsignada": "Zona Norte",
+    "rol": "prevendedor"
+  },
+  {
+    "id": "2",
+    "nombre": "Ana",
+    "apellidos": "Martínez López",
+    "correo": "ana.martinez@example.com",
+    "contrasena": "segura456",
+    "tipoDocumento": "Carné de Extranjería",
+    "numeroDocumento": "CE19283746",
+    "zonaAsignada": "Zona Este",
+    "rol": "prevendedor"
+  },
+  {
+    "id": "3",
+    "nombre": "Carlos",
+    "apellidos": "Ríos Castillo",
+    "correo": "carlos.rios@example.com",
+    "contrasena": "pass789",
+    "tipoDocumento": "Pasaporte",
+    "numeroDocumento": "P1234567",
+    "zonaAsignada": "Zona Sur",
+    "rol": "prevendedor"
+  },
+  {
+    "id": "12",
+    "nombre": "asdasd",
+    "apellidos": "asdasd",
+    "correo": "asdasdas",
+    "contrasena": "dasdasd",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "73114408",
+    "zonaAsignada": "Norte"
+  }
+]

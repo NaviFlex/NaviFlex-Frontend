@@ -1,5 +1,5 @@
 'use client'
-import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay'
+import ErrorOverlay from '../../../../ui/auth/login/ErrorOverlay'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 

@@ -2,17 +2,30 @@
 
 import { UserIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
-import mockDrivers  from '../../../../../fakedata/mockDrivers.json'
+import users  from '../../../../../fakedata/users.json'
 type Driver = {
     id: string;
     nombre: string;
     placa: string;
     correo: string;
     contrasena: string;
+    rol:string
   };
   
 
-const mockDriversData: Driver[] = mockDrivers
+const mockDriversData: Driver[] = users
+.filter((u: any) => u.rol === 'chofer' )
+.map((u: any) => ({
+  id: u.id ?? '',
+  nombre: u.nombre ?? '',
+  apellidos: u.apellidos ?? '',
+  correo: u.correo ?? '',
+  contrasena: u.contrasena ?? '',
+  tipoDocumento: u.tipoDocumento ?? '',
+  numeroDocumento: u.numeroDocumento ?? '',
+  zonaAsignada: u.zonaAsignada ?? '',
+  rol: u.rol ?? '',
+}));
 
 export default function ListDrivers() {
     const router = useRouter()
@@ -49,7 +62,7 @@ export default function ListDrivers() {
                 <div className="absolute bottom-6 right-6">
                     <button
 
-                        onClick={() => router.push('/admin/dashboard/drivers/newdriver')}
+                        onClick={() => router.push('/admin/dashboard/drivers/new-driver')}
                         className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-2xl cursor-pointer transition-transform transform active:scale-95"
 
                     >

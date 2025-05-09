@@ -1,12 +1,16 @@
 'use client'
+import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function CreateSalesmanForm() {
     const router = useRouter()
+    const [successMessage, setSuccessMessage] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const [form, setForm] = useState({
+        id:'12',
         nombre: '',
         apellidos: '',
         correo: '',
@@ -14,6 +18,7 @@ export default function CreateSalesmanForm() {
         tipoDocumento: '',
         numeroDocumento: '',
         zonaAsignada: '',
+        rol:'prevendedor'
     })
 
     const handleChange = (
@@ -32,8 +37,16 @@ export default function CreateSalesmanForm() {
     const handleCancel = () => router.back()
 
     return (
-        <div className="min-h-screen bg-[#7284FB] flex justify-center p-6">
-            <div className="bg-white rounded-2xl w-full max-w-5xl min-h-[80vh] p-6">
+        <>
+                
+                                      <ErrorOverlay
+                                        message={successMessage}
+                                        show={showSuccess}
+                                        type="success"
+                                        onClose={() => setShowSuccess(false)}
+                                    />
+        <div className="w-full h-full rounded-[12px] bg-white">
+            <div className="bg-white rounded-2xl w-full h-full min-h-[80vh] p-6 overflow-y-auto">
                 <h1 className="text-xl font-semibold text-[#7284FB] mb-2">
                     Registro de prevendedor
                 </h1>
@@ -54,7 +67,7 @@ export default function CreateSalesmanForm() {
                                 value={form[name as keyof typeof form]}
                                 onChange={handleChange}
                                 className="w-full px-4 py-2 rounded-full bg-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
-                            />
+                                />
                         </div>
                     ))}
 
@@ -66,7 +79,7 @@ export default function CreateSalesmanForm() {
                             value={form.tipoDocumento}
                             onChange={handleChange}
                             className="w-full px-4 py-2 rounded-full bg-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
-                        >
+                            >
                             <option value="">Seleccionar</option>
                             <option value="DNI">DNI</option>
                             <option value="Carné de Extranjería">Carné de Extranjería</option>
@@ -85,7 +98,7 @@ export default function CreateSalesmanForm() {
                             inputMode="numeric"
                             pattern="\d*"
                             className="w-full px-4 py-2 rounded-full bg-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
-                        />
+                            />
                     </div>
 
                     {/* Zona Asignada */}
@@ -96,7 +109,7 @@ export default function CreateSalesmanForm() {
                             value={form.zonaAsignada}
                             onChange={handleChange}
                             className="w-full px-4 py-2 rounded-full bg-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white"
-                        >
+                            >
                             <option value="">Seleccionar</option>
                             <option value="Norte">Norte</option>
                             <option value="Centro">Centro</option>
@@ -105,20 +118,46 @@ export default function CreateSalesmanForm() {
                     </div>
 
                     {/* Botones */}
-                    <div className="flex justify-between pt-4">
+                    <div className="flex justify-center pt-4 gap-6">
                         <button
                             type="button"
                             onClick={handleCancel}
-                            className="bg-white text-[#7284FB] px-6 py-2 rounded-full hover:bg-gray-100 transition"
-                        >
+                            className=" w-35 h-[44px] text-sm bg-white text-[#7284FB] px-6 py-2 rounded-[12px] hover:bg-gray-100 transition duration-500  cursor-pointer"
+                            >
                             Cancelar
                         </button>
+
                         <button
                             type="submit"
                             disabled={!camposCompletos}
-                            className={`px-6 py-2 rounded-full transition ${
+                            onClick={async () => {
+                                try {
+                                  const response = await fetch('/api/admin/presalesmans/register-users', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify(form),
+                                  });
+                            
+                                  const result = await response.json();
+                            
+                                  if (result.ok) {
+                                    setSuccessMessage('El prevendedor se ha registrado exitosamente');
+                                    setShowSuccess(true);
+                                    setTimeout(() => {
+                                      setShowSuccess(false);
+                                      router.push("/admin/dashboard/salesman");
+                                    }, 3000);
+                                  } else {
+                                    console.error(result.error || 'Ocurrió un error al guardar el chofer');
+                                  }
+                                } catch (error) {
+                                  console.error('Error de red al guardar chofer:', error);
+                                }
+                              }}
+
+                            className={` w-35 h-[44px] px-6 py-2 rounded-[12px] transition ${
                                 camposCompletos
-                                    ? 'bg-[#5a6ffb] text-white hover:bg-[#405dfb]'
+                                ? 'bg-[#5a6ffb] text-white hover:bg-[#405dfb]  transition duration-500  cursor-pointer'
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                         >
@@ -128,5 +167,6 @@ export default function CreateSalesmanForm() {
                 </div>
             </div>
         </div>
+    </>
     )
 }

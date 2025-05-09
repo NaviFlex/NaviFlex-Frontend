@@ -14,6 +14,8 @@ export default function RegisterForm() {
         tipoDocumento: '',
         numeroDocumento: '',
         contrasena: '',
+        correo:'josue12345@gmail.com',
+        rol: 'admin'
     })
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
