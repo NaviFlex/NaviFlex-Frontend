@@ -39,7 +39,6 @@ export default function ListDrivers() {
                     ))}
                 </div>
 
-                {/* Floating action button */}
                 <div className="absolute bottom-6 right-6">
                     <button className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-2xl">
                         +
