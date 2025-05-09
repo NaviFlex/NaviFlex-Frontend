@@ -40,7 +40,7 @@ export default function LoginForm() {
               return;
             }
       
-            window.location.href = '/admin/home';
+            window.location.href = '/admin/dashboard/drivers';
           } catch (err) {
             setError('Error del servidor. Intenta nuevamente.');
             setShowError(true);
