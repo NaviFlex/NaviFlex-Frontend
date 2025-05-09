@@ -9,7 +9,7 @@ export default async function AdminLayout({
     //}
   
     return (
-      <div className="min-h-screen ">
+      <div className="h-screen pt-8 pb-8 pl-6 pr-6 border-2 border-red-500">
         {children}
       </div>
     )
