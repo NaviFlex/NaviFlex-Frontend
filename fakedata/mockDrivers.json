@@ -1,0 +1,33 @@
+[
+  {
+    "id": "1",
+    "nombre": "Chofer 1",
+    "placa": "XFD-0DC",
+    "correo": "chofer1@correo.com",
+    "contrasena": "pass123"
+  },
+  {
+    "id": "2",
+    "nombre": "Chofer 2",
+    "placa": "TRZ-891",
+    "correo": "chofer2@correo.com",
+    "contrasena": "pass456"
+  },
+  {
+    "id": "3",
+    "nombre": "Chofer 3",
+    "placa": "BGY-145",
+    "correo": "chofer3@correo.com",
+    "contrasena": "pass789"
+  },
+  {
+    "nombre": "asdasd",
+    "apellidos": "asdasd",
+    "correo": "asdasdasd",
+    "contrasena": "asdasdas",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "73114408",
+    "placa": "dasdas",
+    "role": "chofer"
+  }
+]
