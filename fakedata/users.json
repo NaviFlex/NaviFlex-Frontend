@@ -1,53 +1,54 @@
 [
   {
-    "nombres": "sdfsdf",
-    "apellidos": "sfsdfs",
-    "empresa": "dfsdfsd",
-    "tipoDocumento": "DNI",
-    "numeroDocumento": "324543",
-    "contrasena": "dsfsf",
-    "correo": "josue12345@gmail.com",
-    "rol": "admin"
-  },
-  {
     "id": "12",
-    "nombre": "asd",
-    "apellidos": "asdas",
-    "correo": "prevendedor1@gmail.com",
+    "nombre": "Manuel",
+    "apellidos": "Cuya",
+    "correo": "prevendedor2@gmail.com",
     "contrasena": "asdas",
     "tipoDocumento": "DNI",
-    "numeroDocumento": "324543",
-    "zonaAsignada": "Norte",
+    "numeroDocumento": "56894326",
+    "zonaAsignada": "Sur",
     "rol": "prevendedor"
   },
   {
-    "nombre": "asdasd",
-    "apellidos": "asdasd",
-    "correo": "chofer1@gmail.com",
+    "nombre": "Michael",
+    "apellidos": "Venegas",
+    "correo": "chofer3@gmail.com",
     "contrasena": "sadsad",
     "tipoDocumento": "DNI",
     "numeroDocumento": "73114408",
-    "placa": "sadasd",
+    "placa": "VGH-403",
     "rol": "chofer"
   },
   {
-    "nombre": "asdas",
-    "apellidos": "sdasd",
-    "correo": "chofer2@gmail.com",
-    "contrasena": "sdasd",
+    "nombres": "Josue",
+    "apellidos": "Arrunategui",
+    "empresa": "IBM",
     "tipoDocumento": "DNI",
-    "numeroDocumento": "342342",
-    "placa": "asda",
-    "rol": "chofer"
+    "numeroDocumento": "73878175",
+    "contrasena": "jos342445",
+    "correo": "u202111033@upc.edu.pe",
+    "rol": "admin"
   },
   {
-    "nombre": "asdad",
-    "apellidos": "asdasdasd",
-    "correo": "chofer3@gmail.com",
-    "contrasena": "asdasd",
+    "id": "13",
+    "nombre": "Enrique",
+    "apellidos": "Gallardo",
+    "correo": "prevendedor1@gmail.com",
+    "contrasena": "123456789",
     "tipoDocumento": "DNI",
-    "numeroDocumento": "234235",
-    "placa": "asdsa",
+    "numeroDocumento": "12345678",
+    "zonaAsignada": "Centro",
+    "rol": "prevendedor"
+  },
+  {
+    "nombre": "Carlos",
+    "apellidos": "Noriega",
+    "correo": "chofer1@gmail.com",
+    "contrasena": "123456789",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "45678903",
+    "placa": "MMG-805",
     "rol": "chofer"
   }
 ]

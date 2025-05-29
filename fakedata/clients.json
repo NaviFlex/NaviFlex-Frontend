@@ -1,0 +1,20 @@
+[
+  {
+    "nombre": "Juan Torres",
+    "direccion": "Av. Los Lirios 345",
+    "zona": "Norte",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "47823450",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "nombre": "Sebastian Cordoba",
+    "direccion": "Av. Los Pelicanos 567",
+    "zona": "Centro",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "34552565",
+    "realizoPedido": false,
+    "rol": "cliente"
+  }
+]

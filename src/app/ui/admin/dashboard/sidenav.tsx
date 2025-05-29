@@ -16,7 +16,7 @@ export default function SideNav() {
             <div className="flex flex-col items-start w-35 ">
                 <span className="mt-2 text-[15px]  font-bold text-[#5E52FF]">Administrador</span>
                 <span className="mt-1 text-sm font-medium text-[#000000FF]">Josue Arrunategui</span>
-                <span className=" text-[10px] font-medium text-[#000000FF]">josuedavidarrunategui@gmail.com</span>
+                <span className=" text-[10px] font-medium text-[#000000FF]">u202111033@upc.edu.pe</span>
             </div>
         </div>
 

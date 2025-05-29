@@ -18,12 +18,9 @@ const mockDriversData: Driver[] = users
 .map((u: any) => ({
   id: u.id ?? '',
   nombre: u.nombre ?? '',
-  apellidos: u.apellidos ?? '',
+  placa: u.placa ?? '',
   correo: u.correo ?? '',
   contrasena: u.contrasena ?? '',
-  tipoDocumento: u.tipoDocumento ?? '',
-  numeroDocumento: u.numeroDocumento ?? '',
-  zonaAsignada: u.zonaAsignada ?? '',
   rol: u.rol ?? '',
 }));
 
@@ -38,7 +35,7 @@ export default function ListDrivers() {
                 </h1>
                 <hr className="border-[#7284FB] mb-6" />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-4">
                     {mockDriversData.map((driver) => (
 
                         <div
