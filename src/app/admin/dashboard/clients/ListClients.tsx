@@ -2,31 +2,37 @@
 
 import { useRouter } from 'next/navigation'
 import clients from '../../../../../fakedata/clients.json'
+import { useState } from 'react'
 
 type Client = {
-    id: string;
-    nombre: string;
-    documento: string;
-    direccion: string;
-    zona: string;
-    realizoPedido: boolean;
+    id: string
+    nombre: string
+    documento: string
+    direccion: string
+    zona: string
+    realizoPedido: boolean
 }
 
 const mockClients: Client[] = clients
-    .filter((u: any) => u.rol === 'cliente' )
+    .filter((u: any) => u.rol === 'cliente')
     .map((u: any) => ({
-      id: u.id ?? '',
-      nombre: u.nombre ?? '',
-      documento: u.numeroDocumento ?? '',
-      direccion: u.direccion ?? '',
-      zona: u.zona ?? '',
-      realizoPedido: u.realizoPedido ?? '',
-    })
-    )
+        id: u.id.toString(),
+        nombre: u.nombre ?? '',
+        documento: u.numeroDocumento ?? '',
+        direccion: u.direccion ?? '',
+        zona: u.zona ?? '',
+        realizoPedido: u.realizoPedido ?? false,
+    }))
 
 export default function ListClients() {
     const router = useRouter()
     const today = new Date().toLocaleDateString('es-PE')
+
+    const [showOnlyPedidos, setShowOnlyPedidos] = useState(false)
+
+    const displayedClients = showOnlyPedidos
+        ? mockClients.filter((client) => client.realizoPedido)
+        : mockClients
 
     return (
         <div className="w-full h-full rounded-[12px] bg-white">
@@ -44,7 +50,14 @@ export default function ListClients() {
                     <button className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white px-4 py-2 rounded-full text-sm transition">
                         Asignar clientes a chofer
                     </button>
-                    <button className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white px-4 py-2 rounded-full text-sm transition">
+                    <button
+                        className={`px-4 py-2 rounded-full text-sm transition border ${
+                            showOnlyPedidos
+                                ? 'bg-white text-[#7284FB] border-[#7284FB] border-2'
+                                : 'bg-[#7284FB] text-white border-transparent hover:bg-[#5a6ffb]'
+                        }`}
+                        onClick={() => setShowOnlyPedidos(!showOnlyPedidos)}
+                    >
                         Pedidos activos para hoy
                     </button>
                 </div>
@@ -61,13 +74,15 @@ export default function ListClients() {
                         </tr>
                         </thead>
                         <tbody>
-                        {mockClients.map((client) => (
+                        {displayedClients.map((client) => (
                             <tr key={client.id} className="border-b border-[#7284FB]">
                                 <td className="py-2 px-4">{client.nombre}</td>
                                 <td className="py-2 px-4">{client.documento}</td>
                                 <td className="py-2 px-4">{client.direccion}</td>
                                 <td className="py-2 px-4">{client.zona}</td>
-                                <td className="py-2 px-4">{client.realizoPedido ? 'Sí' : 'No'}</td>
+                                <td className="py-2 px-4">
+                                    {client.realizoPedido ? 'Sí' : 'No'}
+                                </td>
                             </tr>
                         ))}
                         </tbody>
