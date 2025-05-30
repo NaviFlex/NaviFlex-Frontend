@@ -120,26 +120,26 @@ export default function ListClients() {
                 </div>
                 <hr className="border-[#7284FB] mb-6" />
 
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 items-center justify-center mb-4 w-full bg-[#5E52FF] p-4 rounded-[10px] border-none">
                     <button
-                        className={`px-4 py-2 rounded-full text-sm transition border ${
+                        className={`px-2 py-2 w-[170px] text-sm font-semibold transition rounded-[10px] border-none ${
                             showOnlyPedidos
                                 ? 'bg-[#7284FB] text-white'
                                 : 'bg-white text-[#7284FB] border-[#7284FB] border-2'
                         }`}
                         onClick={() => setShowOnlyPedidos(!showOnlyPedidos)}
                     >
-                        Pedidos activos para hoy
+                        Pedidos <br /> activos para hoy
                     </button>
                     <button
-                        className={`px-4 py-2 rounded-full text-sm transition border ${
+                        className={`px-2 py-2 w-[170px] text-sm font-semibold transition rounded-[10px] border-none ${
                             groupByPrevendedor
                                 ? 'bg-[#7284FB] text-white'
                                 : 'bg-white text-[#7284FB] border-[#7284FB] border-2'
                         }`}
                         onClick={() => setGroupByPrevendedor(!groupByPrevendedor)}
                     >
-                        Agrupar por prevendedor
+                        Agrupar por <br /> prevendedor
                     </button>
                 </div>
 
