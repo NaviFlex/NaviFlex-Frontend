@@ -1,19 +1,121 @@
 [
   {
+    "id": 1,
     "nombre": "Juan Torres",
     "direccion": "Av. Los Lirios 345",
-    "zona": "Norte",
+    "zona": "La Esperanza",
     "tipoDocumento": "DNI",
     "numeroDocumento": "47823450",
     "realizoPedido": true,
     "rol": "cliente"
   },
   {
+    "id": 2,
     "nombre": "Sebastian Cordoba",
     "direccion": "Av. Los Pelicanos 567",
-    "zona": "Centro",
+    "zona": "Florencia de Mora",
     "tipoDocumento": "DNI",
     "numeroDocumento": "34552565",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "id": 3,
+    "nombre": "María Soto",
+    "direccion": "Calle Libertad 102",
+    "zona": "Urbanización Primavera",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "40875413",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "id": 4,
+    "nombre": "Carlos Zegarra",
+    "direccion": "Jr. Santa Rosa 301",
+    "zona": "Víctor Larco",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "42130781",
+    "realizoPedido": false,
+    "rol": "cliente"
+  },
+  {
+    "id": 5,
+    "nombre": "Lucía Fernández",
+    "direccion": "Pasaje Las Flores 122",
+    "zona": "El Porvenir",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "44567892",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "id": 6,
+    "nombre": "Jorge Paredes",
+    "direccion": "Av. América Sur 235",
+    "zona": "La Esperanza",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "48751623",
+    "realizoPedido": false,
+    "rol": "cliente"
+  },
+  {
+    "id": 7,
+    "nombre": "Ana Ríos",
+    "direccion": "Calle Las Amapolas 65",
+    "zona": "Urbanización Santa María",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "49675238",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "id": 8,
+    "nombre": "Pedro Villanueva",
+    "direccion": "Av. Huamán 890",
+    "zona": "Huanchaco",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "43029874",
+    "realizoPedido": false,
+    "rol": "cliente"
+  },
+  {
+    "id": 9,
+    "nombre": "Rosa Jiménez",
+    "direccion": "Jr. Amazonas 112",
+    "zona": "Urbanización Palermo",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "49876231",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "id": 10,
+    "nombre": "Daniel Medina",
+    "direccion": "Calle Junín 456",
+    "zona": "Florencia de Mora",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "41982543",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "id": 11,
+    "nombre": "Mónica Castillo",
+    "direccion": "Av. Larco 654",
+    "zona": "Víctor Larco",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "47658293",
+    "realizoPedido": true,
+    "rol": "cliente"
+  },
+  {
+    "id": 12,
+    "nombre": "Andrés Quispe",
+    "direccion": "Calle Arequipa 998",
+    "zona": "Urbanización California",
+    "tipoDocumento": "DNI",
+    "numeroDocumento": "45321098",
     "realizoPedido": false,
     "rol": "cliente"
   }
