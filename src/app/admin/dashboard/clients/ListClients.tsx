@@ -113,7 +113,7 @@ export default function ListClients() {
 
     return (
         <div className="w-full h-full rounded-[12px] bg-white">
-            <div className="bg-white rounded-2xl shadow-lg w-full h-full min-h-[80vh] p-6 relative">
+            <div className="bg-white rounded-2xl shadow-lg w-full min-h-[80vh] p-6 relative">
                 <div className="flex justify-between items-center mb-4">
                     <h1 className="text-xl font-semibold text-[#7284FB]">Listado de clientes</h1>
                     <span className="text-[#7284FB] font-semibold">{formattedToday}</span>
