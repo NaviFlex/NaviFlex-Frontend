@@ -11,6 +11,7 @@
     "rol": "prevendedor"
   },
   {
+    "id": "15",
     "nombre": "Michael",
     "apellidos": "Venegas",
     "correo": "chofer3@gmail.com",
@@ -42,6 +43,7 @@
     "rol": "prevendedor"
   },
   {
+    "id": "16",
     "nombre": "Carlos",
     "apellidos": "Noriega",
     "correo": "chofer1@gmail.com",
