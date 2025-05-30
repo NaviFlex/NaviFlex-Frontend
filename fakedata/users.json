@@ -1,18 +1,18 @@
 [
   {
     "id": "12",
-    "nombre": "Manuel",
+    "nombre": "Manuel Hernandez",
     "apellidos": "Cuya",
     "correo": "prevendedor2@gmail.com",
     "contrasena": "asdas",
     "tipoDocumento": "DNI",
     "numeroDocumento": "56894326",
-    "zonaAsignada": "Sur",
+    "zonaAsignada": "Florencia de Mora",
     "rol": "prevendedor"
   },
   {
     "id": "15",
-    "nombre": "Michael",
+    "nombre": "Michael Venegas",
     "apellidos": "Venegas",
     "correo": "chofer3@gmail.com",
     "contrasena": "sadsad",
@@ -34,18 +34,18 @@
   },
   {
     "id": "13",
-    "nombre": "Enrique",
+    "nombre": "Enrique Perez",
     "apellidos": "Gallardo",
     "correo": "prevendedor1@gmail.com",
     "contrasena": "123456789",
     "tipoDocumento": "DNI",
     "numeroDocumento": "12345678",
-    "zonaAsignada": "Centro",
+    "zonaAsignada": "Urbanización Primavera",
     "rol": "prevendedor"
   },
   {
     "id": "16",
-    "nombre": "Carlos",
+    "nombre": "Carlos Noriega",
     "apellidos": "Noriega",
     "correo": "chofer1@gmail.com",
     "contrasena": "123456789",
