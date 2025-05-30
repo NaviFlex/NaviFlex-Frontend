@@ -48,7 +48,10 @@ export default function ListSalesman() {
                             <UserIcon className="h-16 w-16 text-white mb-2" />
                             <div className="font-semibold text-sm">{salesman.nombre}</div>
                             <hr className="border-white w-4/5 my-2" />
-                            <button className="bg-white text-[#7284FB] text-sm font-medium px-4 py-1 rounded-full hover:bg-gray-100 transition">
+                            <button
+                                onClick={() => router.push(`/admin/dashboard/salesman/${salesman.id}`)}
+                                className="bg-white text-[#7284FB] text-sm font-medium px-4 py-1 rounded-full hover:bg-gray-100 transition"
+                            >
                                 Ver detalle
                             </button>
                         </div>

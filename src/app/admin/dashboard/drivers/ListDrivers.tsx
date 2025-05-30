@@ -2,27 +2,27 @@
 
 import { UserIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
-import users  from '../../../../../fakedata/users.json'
+import users from '../../../../../fakedata/users.json'
+
 type Driver = {
-    id: string;
-    nombre: string;
-    placa: string;
-    correo: string;
-    contrasena: string;
-    rol:string
-  };
-  
+    id: string
+    nombre: string
+    placa: string
+    correo: string
+    contrasena: string
+    rol: string
+}
 
 const mockDriversData: Driver[] = users
-.filter((u: any) => u.rol === 'chofer' )
-.map((u: any) => ({
-  id: u.id ?? '',
-  nombre: u.nombre ?? '',
-  placa: u.placa ?? '',
-  correo: u.correo ?? '',
-  contrasena: u.contrasena ?? '',
-  rol: u.rol ?? '',
-}));
+    .filter((u: any) => u.rol === 'chofer')
+    .map((u: any) => ({
+        id: u.id ?? '',
+        nombre: u.nombre ?? '',
+        placa: u.placa ?? '',
+        correo: u.correo ?? '',
+        contrasena: u.contrasena ?? '',
+        rol: u.rol ?? '',
+    }))
 
 export default function ListDrivers() {
     const router = useRouter()
@@ -37,7 +37,6 @@ export default function ListDrivers() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-4">
                     {mockDriversData.map((driver) => (
-
                         <div
                             key={driver.id}
                             className="flex flex-col items-center bg-[#7284FB] text-white rounded-xl p-4 shadow-md w-full max-w-[200px] mx-auto"
@@ -49,7 +48,10 @@ export default function ListDrivers() {
                             <div className="font-semibold text-sm">{driver.nombre}</div>
                             <div className="text-xs mt-1 mb-2">Placa de Und: {driver.placa}</div>
 
-                            <button className="bg-white text-[#7284FB] text-sm font-medium px-4 py-1 rounded-full hover:bg-gray-100 transition">
+                            <button
+                                onClick={() => router.push(`/admin/dashboard/drivers/${driver.id}`)}
+                                className="bg-white text-[#7284FB] text-sm font-medium px-4 py-1 rounded-full hover:bg-gray-100 transition"
+                            >
                                 Ver detalle
                             </button>
                         </div>
@@ -58,10 +60,8 @@ export default function ListDrivers() {
 
                 <div className="absolute bottom-6 right-6">
                     <button
-
                         onClick={() => router.push('/admin/dashboard/drivers/new-driver')}
                         className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-2xl cursor-pointer transition-transform transform active:scale-95"
-
                     >
                         +
                     </button>
