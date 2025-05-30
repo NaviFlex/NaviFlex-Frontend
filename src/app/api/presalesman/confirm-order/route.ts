@@ -2,6 +2,15 @@ import fs from 'fs';
 import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 
+function generateRandomOrderNumber(length = 8) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
 export async function POST(request: NextRequest) {
     const body = await request.json();
     const { id } = body;
@@ -20,7 +29,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'Client not found' }, { status: 404 });
     }
 
+    // Marcar como confirmado y asignar número de orden random
     clients[clientIndex].realizoPedido = true;
+    clients[clientIndex].numeroOrden = generateRandomOrderNumber();
 
     fs.writeFileSync(filePath, JSON.stringify(clients, null, 2));
 
