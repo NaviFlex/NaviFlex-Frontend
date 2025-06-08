@@ -16,7 +16,7 @@ const links = [
   },
   {
     name: 'Ver mapa de jornada',
-    href: '/drivers/dashboard/day-map',
+    href: '/drivers/dashboard/maps-jordanian',
     icon: MapIcon,
   },
 
