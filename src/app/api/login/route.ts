@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
-
+import { LoginPayload } from '@/types/auth';
 const filePath = path.join(process.cwd(), 'fakedata', 'users.json');
 
 export async function POST(req: NextRequest) {
-  const { usuario, contrasena } = await req.json();
+
+  const { username, password }: LoginPayload = await req.json();
 
   try {
     const data = await fs.readFile(filePath, 'utf-8');

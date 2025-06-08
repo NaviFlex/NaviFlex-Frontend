@@ -3,15 +3,17 @@ import { useState } from 'react'
 import styles from '../../ui/auth/login/login.module.css'
 import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay';
 import { useRouter } from 'next/navigation';
-
+import { loginUser } from '@/services/auth/authService';
+import { data } from 'framer-motion/client';
+import Cookies from 'js-cookie';
 
 export default function LoginForm() {
-    const [usuario, setUsuario] = useState('')
-    const [contrasena, setContrasena] = useState('')
+    const [username, setUsuario] = useState('')
+    const [password, setContrasena] = useState('')
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
 
-    const camposCompletos = usuario.trim() !== '' && contrasena.trim() !== ''
+    const camposCompletos = username.trim() !== '' && password.trim() !== ''
 
     const [showError, setShowError] = useState(false);
 
@@ -30,30 +32,34 @@ export default function LoginForm() {
       setLoading(true);
     
       try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          body: JSON.stringify({ usuario, contrasena }),
-          headers: { 'Content-Type': 'application/json' },
-        });
-    
-        const result = await res.json();
-    
-        if (!res.ok || !result.ok) {
+        
+        const result = await loginUser({ username, password });
+
+        
+        if (result.status_code !== 200) {
           setError('Credenciales incorrectas');
           setShowError(true);
           setTimeout(() => setShowError(false), 3000);
           return;
         }
+
+        Cookies.set('access_token', result.data.access_token, {
+          path: '/',
+          expires: 1, // 1 día
+          sameSite: 'Lax', // puedes usar 'Strict' o 'None' según tu política
+        });
+
+        localStorage.setItem('userData', JSON.stringify(result.data));
     
         // Redirige según el rol usando router
-        switch (result.rol) {
+        switch (result.data.role) {
           case 'admin':
             router.push('/admin/dashboard/drivers');
             break;
-          case 'chofer':
+          case 'driver':
             router.push('/drivers/dashboard/daily-working-hours');
             break;
-          case 'prevendedor':
+          case 'presalesman':
             router.push('/pre-salesmans/dashboard/daily-working-hours');
             break;
           default:
@@ -64,6 +70,7 @@ export default function LoginForm() {
     
       } catch (err) {
         setError('Error del servidor. Intenta nuevamente.');
+        console.error('Error al iniciar sesión:', err);
         setShowError(true);
         setTimeout(() => setShowError(false), 3000);
       } finally {
@@ -96,7 +103,7 @@ export default function LoginForm() {
                             <label className="block text-white text-sm mb-1">Usuario</label>
                             <input
                                 type="text"
-                                value={usuario}
+                                value={username}
                                 onChange={(e) => setUsuario(e.target.value)}
                                 className="w-full px-4 py-2 rounded-lg border border-white bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white transition duration-300"
                                 />
@@ -106,7 +113,7 @@ export default function LoginForm() {
                             <label className="block text-white text-sm mb-1">Contraseña</label>
                             <input
                                 type="password"
-                                value={contrasena}
+                                value={password}
                                 onChange={(e) => setContrasena(e.target.value)}
                                 className="w-full px-4 py-2 rounded-lg border border-white bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white transition duration-300"
                                 />

@@ -3,16 +3,22 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from '../../../ui/auth/login/login.module.css'
+import { verifyEmail } from '@/services/admin/verify-email/emailVerification'
+import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay'
+
 
 export default function EmailRegisterForm() {
     const [email, setEmail] = useState('')
+
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
+    const [showError, setShowError] = useState(false);
 
     const router = useRouter()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+        setError('');
 
         if (!email.trim()) {
             setError('El e-mail es obligatorio.')
@@ -22,18 +28,27 @@ export default function EmailRegisterForm() {
         setLoading(true)
 
         try {
-            const res = await fetch('/api/register/email', {
-                method: 'POST',
-                body: JSON.stringify({ email }),
-                headers: { 'Content-Type': 'application/json' },
-            })
+            const result = await verifyEmail( email )
 
-            if (!res.ok) {
-                setError('Error al enviar el correo.')
+            if( result.status_code === 422) {
+                setError('El formato del e-mail es incorrecto')
+                setShowError(true);
+                setTimeout(() => setShowError(false), 3000);
                 return
             }
 
+            if (result.status_code === 400) {
+                setError('El e-mail ya está registrado.')
+                setShowError(true);
+                setTimeout(() => setShowError(false), 3000);
+                return
+            }
+
+            //Guardar el e-mail en localStorage para usarlo en la verificación posterior
+            localStorage.setItem('emailRegister', email)
+
             router.push('/auth/register/verify')
+            
         } catch (err) {
             setError('Error del servidor.')
         } finally {
@@ -43,6 +58,14 @@ export default function EmailRegisterForm() {
 
     return (
         <>
+            <ErrorOverlay
+                            message={error}
+                            show={showError}
+                            onClose={() => setShowError(false)}
+            />
+
+
+
         <div
         className={styles.container_principale}
         

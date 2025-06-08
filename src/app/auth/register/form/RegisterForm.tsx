@@ -1,11 +1,25 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../../../ui/auth/login/login.module.css'
 import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay';
+import { registerAdminService } from '@/services/admin/iam/registerAdminService';
+
 
 export default function RegisterForm() {
+
+    const router = useRouter();
+
+    useEffect(() => {
+      const verified = sessionStorage.getItem('email_verified');
+      if (verified !== 'true') {
+        router.replace('/auth/register/verify'); // redirige si no pasó verificación
+      }
+    }, []);
+
+
+    
 
     const [form, setForm] = useState({
         nombres: '',
@@ -14,28 +28,82 @@ export default function RegisterForm() {
         tipoDocumento: '',
         numeroDocumento: '',
         contrasena: '',
-        correo:'josue12345@gmail.com',
-        rol: 'admin'
+        confirmarContrasena: '',
+        correo:'',
     })
+
+
+    useEffect(() => {
+        if (form.confirmarContrasena && form.contrasena !== form.confirmarContrasena) {
+          setErrorConfirmacion('Las contraseñas no coinciden');
+        } else {
+          setErrorConfirmacion('');
+        }
+    }, [form.contrasena, form.confirmarContrasena]);
+
+      
+    const [errorConfirmacion, setErrorConfirmacion] = useState('');
+
+
+
+
+    useEffect(() => {
+        const tipoDocumento = form.tipoDocumento;
+        const numeroDocumento = form.numeroDocumento;
+      
+        let valido = true;
+      
+        if (!numeroDocumento) {
+          setErrorDocumento('');
+          return;
+        }
+      
+        switch (tipoDocumento) {
+          case 'DNI':
+            valido = numeroDocumento.length === 8;
+            break;
+          case 'Carné de Extranjería':
+            valido = numeroDocumento.length === 9;
+            break;
+          case 'Pasaporte':
+            valido = numeroDocumento.length >= 7 && numeroDocumento.length <= 12;
+            break;
+        }
+      
+        if (!valido) {
+          setErrorDocumento('Número inválido para el tipo seleccionado');
+        } else {
+          setErrorDocumento('');
+        }
+      }, [form.tipoDocumento, form.numeroDocumento]); // ✅ correcto, warning eliminado
+      
+      
+    const [errorDocumento, setErrorDocumento] = useState('');
+
+
     const [error, setError] = useState('')
     const [loading, setLoading] = useState(false)
-    const router = useRouter()
+
+
 
     const [successMessage, setSuccessMessage] = useState('');
     const [showSuccess, setShowSuccess] = useState(false);
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-    ) => {
-        const { name, value } = e.target
-
+      ) => {
+        const { name, value } = e.target;
+      
         if (name === 'numeroDocumento') {
-            const soloNumeros = value.replace(/\D/g, '')
-            setForm((prev) => ({ ...prev, [name]: soloNumeros }))
+          const soloNumeros = value.replace(/\D/g, '');
+          setForm((prev) => ({ ...prev, [name]: soloNumeros }));
+        } else if (name === 'empresa') {
+          setForm((prev) => ({ ...prev, [name]: value.toUpperCase() }));
         } else {
-            setForm((prev) => ({ ...prev, [name]: value }))
+          setForm((prev) => ({ ...prev, [name]: value }));
         }
-    }
+      };
+      
 
 
     const camposCompletos =
@@ -44,7 +112,9 @@ export default function RegisterForm() {
         form.empresa.trim() &&
         form.tipoDocumento.trim() &&
         form.numeroDocumento.trim() &&
-        form.contrasena.trim()
+        form.contrasena.trim() &&
+        form.confirmarContrasena.trim() &&
+        form.contrasena === form.confirmarContrasena
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -57,34 +127,58 @@ export default function RegisterForm() {
             return
         }
 
-        setLoading(true)
+        
+        //obtener el correo del localStorage
+        const email = localStorage.getItem('emailRegister');
+        
+        if (!email) {
+            setError('Correo electrónico no encontrado. Por favor, verifica tu registro.');
+            router.push('/auth/register/email');
+            return;
+        }
 
+
+        setLoading(true)
+        
         try {
-            const res = await fetch('/api/register/finalize', {
-                method: 'POST',
-                body: JSON.stringify(form),
-                headers: { 'Content-Type': 'application/json' },
+            const res = await registerAdminService({
+                full_name: form.nombres,
+                last_names: form.apellidos,
+                document_number: form.numeroDocumento,
+                type_document: form.tipoDocumento,
+                email: email,
+                password: form.contrasena,
+                company_name: form.empresa,
             })
 
-            if (!res.ok) {
-                setError('No se pudo completar el registro')
+            if( res.status_code !== 201) {
+                if (res.status_code === 422) {
+                    setError('El formato del número de documento es incorrecto')
+                } else if (res.status_code === 400) {
+                    setError(res.detail)
+                } else if (res.status_code === 404) {
+                    setError(res.detail)
+                }else {
+                    setError('Error al registrar administrador')
+                }
                 return
             }
+
+
 
             setSuccessMessage('Te has registrado exitosamente');
             setShowSuccess(true);
             setTimeout(() => {
                 setShowSuccess(false);
-                router.push("/admin/dashboard/drivers")
+                router.push("/auth/login");
             }, 3000);
 
 
-            
+            setLoading(false)
         } catch {
             setError('Error de red o servidor')
-        } finally {
             setLoading(false)
-        }
+        } 
     }
 
     return (
@@ -149,8 +243,13 @@ export default function RegisterForm() {
                                         onChange={handleChange}
                                         inputMode="numeric"
                                         pattern="\d*"
+                                        disabled={!form.tipoDocumento}
                                         className="w-full h-[35px] px-4 py-2 rounded-lg border border-white bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white transition duration-300"
                                         />
+                                        {errorDocumento && (
+                                            <p className="text-red-100 text-xs mt-1">{errorDocumento}</p>
+                                            )}
+
                                 </div>
                                     </div>
                             <div>
@@ -163,6 +262,20 @@ export default function RegisterForm() {
                                     className="w-full h-[35px] px-4 py-2 rounded-lg border border-white bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white transition duration-300"
                                 />
                             </div>
+                            <div>
+                            <label className="block text-white text-sm mb-1">Confirmar contraseña</label>
+                            <input
+                                type="password"
+                                name="confirmarContrasena"
+                                value={form.confirmarContrasena}
+                                onChange={handleChange}
+                                className="w-full h-[35px] px-4 py-2 rounded-lg border border-white bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white transition duration-300"
+                            />
+                              {errorConfirmacion && (
+                                    <p className="text-red-100 text-xs mt-1">{errorConfirmacion}</p>
+                                )}
+                            </div>
+
 
                             <div className="flex flex-col justify-center items-center w-full gap-2 mt-10">
 

@@ -4,12 +4,13 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from '../../../ui/auth/login/login.module.css'
 import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay';
- 
+import { verifyEmailCode,verifyEmail } from '@/services/admin/verify-email/emailVerification'
 
 export default function VerifyCodeForm() {
     const [code, setCode] = useState(['', '', '', '', '', ''])
     const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [loadingConfirm, setLoadingConfirm] = useState(false)
+    const [loadingResend, setLoadingResend] = useState(false)
     const inputsRef = useRef<HTMLInputElement[]>([])
     const router = useRouter()
 
@@ -42,21 +43,39 @@ export default function VerifyCodeForm() {
             return
         }
 
-        setLoading(true)
+        setLoadingConfirm(true)
 
         try {
-            const res = await fetch('/api/register/verify', {
-                method: 'POST',
-                body: JSON.stringify({ code: fullCode }),
-                headers: { 'Content-Type': 'application/json' },
-            })
 
-            if (!res.ok) {
-                setErrorMessage('Código incorrecto.')
+            const email = localStorage.getItem('emailRegister')
+            if (!email) {
+                setErrorMessage('No se encontró el e-mail registrado.')
+                setShowError(true);
+                //mostrar el mensaje y redirigir al formulario de e-mail
+                setTimeout(() => {
+                    setShowError(false);
+                    router.push('/auth/register/email')
+                }, 3000);
+                return
+            }
+
+            const result = await verifyEmailCode(fullCode, email)
+            console.log('Resultado de la verificación:', result)
+            if (result.status_code !== 200) {
+                if (result.status_code === 422) {
+                    setErrorMessage('El formato del código es incorrecto.')
+                } else if (result.status_code === 400) {
+                    setErrorMessage('Código de verificación inválido o expirado. Solícitalo nuevamente.')
+                } else {
+                    setErrorMessage('Error al verificar el código.')
+                }
                 setShowError(true);
                 setTimeout(() => setShowError(false), 3000);
                 return
             }
+            // después de verificar el código correctamente
+            sessionStorage.setItem('email_verified', 'true');
+
 
             router.push('/auth/register/form')
         } catch {
@@ -64,12 +83,39 @@ export default function VerifyCodeForm() {
             setShowError(true);
             setTimeout(() => setShowError(false), 3000);
         } finally {
-            setLoading(false)
+            setLoadingConfirm(false)
         }
     }
 
     const handleResendCode = async () => {
         try {
+
+            setLoadingResend(true);
+            setErrorMessage('');
+
+            const email = localStorage.getItem('emailRegister')
+            if (!email) {
+                setErrorMessage('No se encontró el e-mail registrado.');
+                setShowError(true);
+                //mostrar el mensaje y redirigir al formulario de e-mail
+                setTimeout(() => {
+                    setShowError(false);
+                    router.push('/auth/register/email');
+                }, 3000);
+                return;
+            }
+
+            const result = await verifyEmail( email); // Llamada para reenviar el código
+
+            if (result.status_code !== 200) {
+              setErrorMessage('No se pudo reenviar el código.');
+              setShowError(true);
+              setTimeout(() => setShowError(false), 3000);
+              return;
+            }
+
+        //limpiar el código actual
+        setCode(['', '', '', '', '', '']);
 
       
           setSuccessMessage('Se ha reenviado un nuevo código a tu correo.');
@@ -79,6 +125,8 @@ export default function VerifyCodeForm() {
             setErrorMessage('No se pudo reenviar el código.');
           setShowError(true);
           setTimeout(() => setShowError(false), 3000);
+        } finally {
+            setLoadingResend(false);
         }
       };
       
@@ -140,22 +188,27 @@ export default function VerifyCodeForm() {
 
                         <button
                             type="submit"
-                            disabled={loading || code.join('').length < 6}
+                            disabled={loadingConfirm || code.join('').length < 6}
                             className={`w-65 h-[44px] text-sm font-medium  py-2 rounded-[12px] transition duration-500  cursor-pointer ${
-                                code.join('').length === 6 && !loading
+                                code.join('').length === 6 && !loadingConfirm
                                     ? 'bg-white text-indigo-600 hover:bg-indigo-500 hover:text-white'
                                     : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                             }`}
                             >
-                            {loading ? 'Verificando...' : 'Confirmar código'}
+                            {loadingConfirm ? 'Verificando...' : 'Confirmar código'}
                         </button>
 
                         <button
                             type="button"
+                            disabled={loadingResend}
                             onClick={handleResendCode}
-                            className="w-65 h-[44px] text-sm bg-[#5E52FF] font-medium text-white py-2 rounded-[12px] hover:bg-indigo-700 transition duration-500  cursor-pointer"
+                            className={`w-65 h-[44px] text-sm font-medium py-2 rounded-[12px] transition duration-500 cursor-pointer ${
+                                !loadingResend
+                                    ? 'bg-white text-indigo-600 hover:bg-indigo-500 hover:text-white'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
                         >
-                            Reenviar codigo
+                            {loadingResend ? 'Reenviando...' : 'Reenviar código'}
                         </button>
                     </div>
             </form>
