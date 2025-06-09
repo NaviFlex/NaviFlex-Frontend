@@ -4,7 +4,6 @@ import styles from '../../ui/auth/login/login.module.css'
 import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay';
 import { useRouter } from 'next/navigation';
 import { loginUser } from '@/services/auth/authService';
-import { data } from 'framer-motion/client';
 import Cookies from 'js-cookie';
 
 export default function LoginForm() {
@@ -46,8 +45,12 @@ export default function LoginForm() {
         Cookies.set('access_token', result.data.access_token, {
           path: '/',
           expires: 1, // 1 día
+          secure: false,
           sameSite: 'Lax', // puedes usar 'Strict' o 'None' según tu política
         });
+
+        console.log('Token desde js-cookie:', Cookies.get('access_token'));
+
 
         localStorage.setItem('userData', JSON.stringify(result.data));
     

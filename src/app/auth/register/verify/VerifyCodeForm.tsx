@@ -74,6 +74,7 @@ export default function VerifyCodeForm() {
                 return
             }
             // después de verificar el código correctamente
+            console.log('Código verificado correctamente')
             sessionStorage.setItem('email_verified', 'true');
 
 
@@ -108,9 +109,15 @@ export default function VerifyCodeForm() {
             const result = await verifyEmail( email); // Llamada para reenviar el código
 
             if (result.status_code !== 200) {
-              setErrorMessage('No se pudo reenviar el código.');
+              setErrorMessage(result.message || 'Error al reenviar el código.');
               setShowError(true);
-              setTimeout(() => setShowError(false), 3000);
+              //rediirigir al formulario de e-mail
+              setTimeout(() => {
+                setShowError(false);
+                router.push('/auth/register/email');
+                
+              },3000)
+               
               return;
             }
 

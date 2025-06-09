@@ -1,6 +1,5 @@
 import { ApiResponse } from "@/types/shared/api_response";
 import { fetchWithAuth } from "@/utils/fetchWithAuth";
-import { useRouter } from "next/navigation";
 
 
 export async function verifyEmail(email: string): Promise<ApiResponse> {

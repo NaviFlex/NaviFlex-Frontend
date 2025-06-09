@@ -13,6 +13,7 @@ export default function RegisterForm() {
 
     useEffect(() => {
       const verified = sessionStorage.getItem('email_verified');
+      console.log('verified', verified);
       if (verified !== 'true') {
         router.replace('/auth/register/verify'); // redirige si no pasó verificación
       }

@@ -20,11 +20,6 @@ export async function loginUser(data: LoginFormData): Promise<ApiResponse> {
 
   const json = await res.json();
 
-  if (!res.ok) {
-    const errorData =  res;
-    console.error('Error al iniciar sesión:', errorData);
-    throw new Error(errorData.detail || 'Error al iniciar sesión');
-  }
 
   return json as ApiResponse;
 }

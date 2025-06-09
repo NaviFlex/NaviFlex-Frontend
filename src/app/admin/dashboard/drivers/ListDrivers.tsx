@@ -1,56 +1,67 @@
 'use client'
 
-import { UserIcon } from '@heroicons/react/24/outline'
+import { UserIcon, PlusCircleIcon } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
-import users from '../../../../../fakedata/users.json'
+import { useUser } from '@/hooks/useUser'
+import { getDriversByAdminId } from '@/services/admin/drivers/adminDriversService'
+import { useEffect, useState } from 'react'
+import { ApiResponse } from '@/types/shared/api_response'
+import { Driver } from '@/types/admin/drivers/getDriversType'
 
-type Driver = {
-    id: string
-    nombre: string
-    placa: string
-    correo: string
-    contrasena: string
-    rol: string
-}
-
-const mockDriversData: Driver[] = users
-    .filter((u: any) => u.rol === 'chofer')
-    .map((u: any) => ({
-        id: u.id ?? '',
-        nombre: u.nombre ?? '',
-        placa: u.placa ?? '',
-        correo: u.correo ?? '',
-        contrasena: u.contrasena ?? '',
-        rol: u.rol ?? '',
-    }))
 
 export default function ListDrivers() {
     const router = useRouter()
+    const user = useUser();
+    const [drivers, setDrivers] = useState<Driver[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+  
+    useEffect(() => {
+      if (!user?.profileId) return;
+  
+      const fetchDrivers = async () => {
+        try {
+          const response: ApiResponse<Driver[]> = await getDriversByAdminId(user.profileId);
+          setDrivers(response.data || []);
+        } catch (err: any) {
+          console.error('Error al obtener conductores:', err);
+          setError('No se pudo obtener la lista de choferes.');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchDrivers();
+    }, [user?.profileId]);
+
+    if (loading) return <p className="p-4">Cargando choferes...</p>;
+    if (error) return <p className="p-4 text-red-500">{error}</p>;
 
     return (
         <div className="w-full h-full rounded-[12px] bg-white">
             <div className="bg-white rounded-2xl shadow-lg w-full h-full min-h-[80vh] p-6 relative">
-                <h1 className="text-xl font-semibold text-[#7284FB] mb-2">
+                <h1 className="text-xl font-semibold text-[#5E52FF] mb-2">
                     Listado de choferes/unidades
                 </h1>
-                <hr className="border-[#7284FB] mb-6" />
+                <hr className="border-[#5E52FF] border-1 mb-6" />
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-2 gap-y-4">
-                    {mockDriversData.map((driver) => (
+                <div className="grid grid-cols-[repeat(auto-fit,_minmax(180px,_1fr))] gap-2">
+                    {drivers.map((driver) => (
                         <div
                             key={driver.id}
-                            className="flex flex-col items-center bg-[#7284FB] text-white rounded-xl p-4 shadow-md w-full max-w-[200px] mx-auto"
+                            className="flex flex-col items-center bg-[#5E52FF] text-white rounded-xl p-4 shadow-md w-full max-w-[200px] mx-auto"
                         >
                             <div className="text-4xl mb-2">
                                 <UserIcon className="h-15 w-15 text-white" />
                             </div>
 
-                            <div className="font-semibold text-sm">{driver.nombre}</div>
-                            <div className="text-xs mt-1 mb-2">Placa de Und: {driver.placa}</div>
+                            <div className="font-semibold text-sm mb-2">{driver.full_name}</div>
+                            <hr className="border-[#ffffff]  mb-2 w-full" />
+                            <div className="text-xs mt-1 mb-4">Placa de Und: {driver.badge_number}</div>
+
 
                             <button
                                 onClick={() => router.push(`/admin/dashboard/drivers/${driver.id}`)}
-                                className="bg-white text-[#7284FB] text-sm font-medium px-4 py-1 rounded-full hover:bg-gray-100 transition"
+                                className="bg-white text-[#5E52FF] text-sm font-medium px-4 py-1 rounded-[10px] hover:bg-gray-100 transition cursor-pointer shadow-md"
                             >
                                 Ver detalle
                             </button>
@@ -58,14 +69,14 @@ export default function ListDrivers() {
                     ))}
                 </div>
 
-                <div className="absolute bottom-6 right-6">
-                    <button
-                        onClick={() => router.push('/admin/dashboard/drivers/new-driver')}
-                        className="bg-[#7284FB] hover:bg-[#5a6ffb] text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg text-2xl cursor-pointer transition-transform transform active:scale-95"
-                    >
-                        +
-                    </button>
-                </div>
+                <PlusCircleIcon 
+                    onClick={() => router.push('/admin/dashboard/drivers/new-driver')}
+                    aria-label="Agregar nuevo chofer"
+                    className="absolute bottom-6 right-6 text-[#5E52FF] w-15 h-15 cursor-pointer hover:scale-105 transition-transform"
+                    />
+
+                    
+              
             </div>
         </div>
     )
