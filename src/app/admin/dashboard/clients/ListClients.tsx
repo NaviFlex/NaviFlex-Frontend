@@ -1,6 +1,6 @@
 'use client'
 import { toast } from 'sonner';
-
+import { PlusCircleIcon } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
 import clients from '../../../../../fakedata/clients.json'
 import users from '../../../../../fakedata/users.json'
@@ -112,15 +112,15 @@ export default function ListClients() {
     }))
 
     return (
-        <div className="w-full h-full rounded-[12px] bg-white">
-            <div className="bg-white rounded-2xl shadow-lg w-full min-h-[80vh] p-6 relative">
+        <div className="w-full h-full rounded-[12px] bg-white flex flex-col">
+            <div className="bg-white rounded-2xl shadow-lg w-full h-full p-6 flex flex-col">
                 <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-xl font-semibold text-[#7284FB]">Listado de clientes</h1>
-                    <span className="text-[#7284FB] font-semibold">{formattedToday}</span>
+                    <h1 className="text-[25px] font-semibold text-[#5E52FF]">Listado de clientes</h1>
+                    <span className="text-[#5E52FF] text-[20px] font-semibold">{formattedToday}</span>
                 </div>
-                <hr className="border-[#7284FB] mb-6" />
+                <hr className="border-[#5E52FF] border-1 mb-6" />
 
-                <div className="flex flex-wrap gap-2 items-center justify-center mb-4 w-full bg-[#5E52FF] p-4 rounded-[10px] border-none">
+                <div className="flex flex-wrap gap-2 items-center justify-center mb-4 w-full bg-[#5E52FF] p-4 rounded-[10px] border-none sticky top-0 z-10">
                     <button
                         className={`px-2 py-2 w-[170px] text-sm font-semibold transition rounded-[10px] border-none ${
                             showOnlyPedidos
@@ -142,6 +142,8 @@ export default function ListClients() {
                         Agrupar por <br /> prevendedor
                     </button>
                 </div>
+
+                <div className="overflow-y-auto flex-grow custom-scroll pr-2">
 
                 {!groupByPrevendedor ? (
                     <div className="overflow-x-auto">
@@ -250,7 +252,23 @@ export default function ListClients() {
                         </div>
                     ))
                 )}
+                </div>
+ 
+                <PlusCircleIcon 
+                                    onClick={() => router.push('/admin/dashboard/clients/new-client')}
+                                    aria-label="Agregar nuevo chofer"
+                                    className="absolute bottom-10 right-10 text-[#5E52FF] w-15 h-15 cursor-pointer hover:scale-105 transition-transform"
+                                    />
+
             </div>
+
+
+
+           
+
+
+
+
         </div>
     )
 }

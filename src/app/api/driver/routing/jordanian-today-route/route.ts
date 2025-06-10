@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function POST() {
-  const backendUrl = `${process.env.BACKEND_URL}/routes/obtain_daily_jordanian_route`;
+  const backendUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/routes/obtain_daily_jordanian_route`;
 
   const requestBody = {
     driver_id: 1,
@@ -9,7 +9,7 @@ export async function POST() {
   };
 
   try {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcnViZWFhXzFAZ21haWwuY29tIiwiZXhwIjoxNzQ5MzU2ODE1fQ.0kz--95bASnH68kzPA4-gHNhF7b5ojIi7ec9G04RfUE"//localStorage.getItem("token");
+    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJwcnViZWFhXzFAZ21haWwuY29tIiwidXNlcl9pZCI6Miwicm9sZSI6ImFkbWluIiwicHJvZmlsZV9pZCI6MiwiZXhwIjoxNzQ5NTIyNzQxfQ.8OJeJKxhPIPKT8PITnuLsb97H8w8-6tmu_3D-BOClHo"//localStorage.getItem("token");
 
     const res = await fetch(backendUrl, {
       method: "POST",
@@ -29,8 +29,11 @@ export async function POST() {
 
     const data = await res.json();
 
+    console.log("Datos de la ruta:", data);
+
     return NextResponse.json(data);
   } catch (error) {
+    
     console.error("Error al obtener ruta de la jornada:", error);
     return NextResponse.json({ error: "Error interno" }, { status: 500 });
   }

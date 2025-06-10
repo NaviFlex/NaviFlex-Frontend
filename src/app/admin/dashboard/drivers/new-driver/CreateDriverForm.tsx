@@ -5,6 +5,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {registerDriver} from '@/services/admin/drivers/adminDriversService'
 import { useUser } from '@/hooks/useUser'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+  } from "@/components/ui/select"
+
 
 export default function CreateDriverForm() {
     const router = useRouter()
@@ -92,13 +100,22 @@ export default function CreateDriverForm() {
                         ))}
 
                         <div>
-                            <label className="block text-sm mb-1">Tipo de documento</label>
-                            <select name="tipoDocumento" value={form.tipoDocumento} onChange={handleChange} className="w-full px-4 py-2 rounded-full bg-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white">
-                                <option value="">Seleccionar</option>
-                                <option value="DNI">DNI</option>
-                                <option value="Carné de Extranjería">Carné de Extranjería</option>
-                                <option value="Pasaporte">Pasaporte</option>
-                            </select>
+                             <label className="block text-sm mb-1">Tipo de documento</label>
+                            <Select
+                                onValueChange={(value) =>
+                                setForm((prev) => ({ ...prev, tipoDocumento: value }))
+                                }
+                                value={form.tipoDocumento}
+                            >
+                                <SelectTrigger className="w-full bg-white rounded-[10px] text-[#5E52FF] focus:ring-2 focus:ring-white">
+                                    <SelectValue placeholder="Seleccionar" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-white text-[#5E52FF]">
+                                    <SelectItem value="DNI">DNI</SelectItem>
+                                    <SelectItem value="Carné de Extranjería">Carné de Extranjería</SelectItem>
+                                    <SelectItem value="Pasaporte">Pasaporte</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
 
                         <div>
@@ -111,7 +128,7 @@ export default function CreateDriverForm() {
                                 inputMode="numeric"
                                 pattern="\d*"
                                 disabled={!form.tipoDocumento || form.tipoDocumento === ''}
-                                className="w-full px-4 py-2 rounded-full bg-gray-200 text-gray-800 focus:outline-none focus:ring-2 focus:ring-white disabled:opacity-60"
+                                className="w-full px-4 py-2 rounded-[12px] bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-white disabled:opacity-60"
                             />
                             {form.numeroDocumento && !documentoValido && (
                                 <p className="text-red-200 text-xs mt-1">Número de documento inválido para el tipo seleccionado</p>

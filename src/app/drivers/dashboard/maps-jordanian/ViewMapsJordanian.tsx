@@ -145,7 +145,7 @@ export default function ViewMapsJordanian() {
       const res = await fetch('/api/driver/routing/jordanian-today-route', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driver_id: 1, date: '2025-06-07' }),
+        body: JSON.stringify({ driver_id: 1, date: '2025-06-09' }),
       });
 
       const json = await res.json();
