@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
           return NextResponse.redirect(new URL(redirectPath, request.url));
         }
       } catch (err) {
-        console.warn('⚠️ Token inválido o expirado. Se permite login.');
+        console.warn('⚠️ Token inválido o expirado. Se permite login.', err);
         return NextResponse.next();
       }
     }
