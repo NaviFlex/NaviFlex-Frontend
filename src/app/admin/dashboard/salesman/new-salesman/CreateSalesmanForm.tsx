@@ -3,7 +3,6 @@
 import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { buildPayload } from '@/utils/buildPayload'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUser } from '@/hooks/useUser'
 import { AreaType } from '@/types/admin/areaType'
@@ -12,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command'
 import { ChevronsUpDown, Check } from 'lucide-react'
+import { createPresalesman } from '@/services/admin/presalesmans/adminPresalesmansService'
 
 
 export default function CreateSalesmanForm() {
@@ -220,29 +220,66 @@ export default function CreateSalesmanForm() {
                                 type="submit"
                                 disabled={!camposCompletos}
                                 onClick={async () => {
-                                    const payload = buildPayload(form, 'prevendedor')
+                                    const payload = {
+                                        email: form.correo,
+                                        full_name: form.nombre,
+                                        last_names: form.apellidos,
+                                        document_number: form.numeroDocumento,
+                                        type_document: form.tipoDocumento,
+                                        password: form.contrasena,
+                                        administrator_id: user?.profileId || 0, // Asegúrate de que este ID sea correcto
+                                        areas_id: selectedAreas // Aquí pasamos las áreas seleccionadas
+                                    }
 
                                     try {
-                                        const response = await fetch('/api/admin/presalesmans/register-users', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify(payload),
-                                        })
+                                        const result = await createPresalesman(payload)
 
-                                        const result = await response.json()
-
-                                        if (result.ok) {
-                                            setSuccessMessage('El prevendedor se ha registrado exitosamente')
+                                        if (result.status_code === 201) {
+                                            setSuccessMessage('Prevendedor registrado exitosamente')
                                             setShowMessage(true)
+                                            setForm({
+                                                nombre: '',
+                                                apellidos: '',
+                                                correo: '',
+                                                contrasena: '',
+                                                confirmarContrasena: '',
+                                                tipoDocumento: '',
+                                                numeroDocumento: ''
+                                            })
+                                            setSelectedAreas([])
+
                                             setTimeout(() => {
-                                                setShowMessage(false)
                                                 router.push('/admin/dashboard/salesman')
                                             }, 3000)
-                                        } else {
-                                            console.error(result.error || 'Ocurrió un error al guardar el prevendedor')
+                                        }else{
+                                            if(result.status_code === 400) {
+                                                setErrorMessage(result.message || 'Error al registrar prevendedor')
+                                                setShowMessage(true)
+
+                                                setTimeout(() => {
+                                                    setShowMessage(false)
+                                                }, 3000)
+                                            } else if (result.status_code === 409) {
+                                                setErrorMessage('El correo electrónico ya está en uso')
+                                                setShowMessage(true)
+                                                setTimeout(() => {
+                                                    setShowMessage(false)
+                                                }, 3000)
+                                            } else {
+                                                setErrorMessage('Error inesperado. Intente nuevamente.')
+                                                setShowMessage(true)
+                                                setTimeout(() => {
+                                                    setShowMessage(false)
+                                                }, 3000)
+                                            }
                                         }
                                     } catch (error) {
-                                        console.error('Error de red al guardar prevendedor:', error)
+                                        console.error('Error al registrar prevendedor:', error)
+                                        setErrorMessage('Error al registrar prevendedor')
+                                        setShowMessage(true)
+                                        setTimeout(() => {
+                                            setShowMessage(false)
+                                        }, 3000)
                                     }
                                 }}
                                 className={ 'bg-[#7284FB] text-white font-semibold px-6 py-2 rounded-[12px] hover:bg-[#4E44D4] transition-transform duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer'}
