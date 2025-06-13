@@ -28,12 +28,21 @@ export default function SideNav() {
         <div className="w-full h-full flex flex-col justify-between items-center ">
             <div></div>
             <button
-                onClick={() => router.push('/auth/login')}
-                className="flex items-center gap-2 text-sm text-indigo-700 hover:text-white transition-all"
-                >
-                <ArrowRightStartOnRectangleIcon className="h-5 w-5"/>
-                Cerrar sesión
-            </button>
+            onClick={() => {
+              // 1. Borrar cookie (expirarla manualmente)
+              document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+              // 2. (Opcional) Limpiar también datos del localStorage si aún usas algo ahí
+              localStorage.removeItem('userData');
+
+              // 3. Redirigir al login
+              router.push('/auth/login');
+            }}
+            className="flex items-center gap-2 text-sm text-indigo-700 hover:text-white transition-all"
+          >
+            <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
+            Cerrar sesión
+          </button>
         </div>
     </div>
 

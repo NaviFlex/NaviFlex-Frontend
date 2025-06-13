@@ -7,6 +7,7 @@ export interface ClientType {
     latitude: string
     longitude: string
     areas_id: number
+    order_confirmed: boolean | null
 }
 
 
@@ -19,4 +20,9 @@ export interface CreateClientType {
     longitude: string
     area_description_name: string
     administrator_id: number
+}
+
+
+export interface ClientByAreaType {
+    [areaName: string]: ClientType[];
 }
