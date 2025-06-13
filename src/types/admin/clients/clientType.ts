@@ -7,6 +7,8 @@ export interface ClientType {
     latitude: string
     longitude: string
     areas_id: number
+    area_name: string | null 
+    presalesman_id: number | null
     order_confirmed: boolean | null
 }
 
@@ -25,4 +27,8 @@ export interface CreateClientType {
 
 export interface ClientByAreaType {
     [areaName: string]: ClientType[];
+}
+
+export interface ClientByAdministratorType {
+    [presalesman_name: string]: ClientType[];
 }
