@@ -21,3 +21,21 @@ export async function creeateRouteByDriverAndPresalesman(driver_id: number, pres
 
     return json as ApiResponse<number>;
 }
+
+
+export async function verifyRoutesByPresalesmansIds(presalesmans_ids: number[]): Promise<ApiResponse<any>> {
+    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}/routes/verify_presalesmans_route`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(presalesmans_ids)  // Enviar el array directamente
+    });
+  
+    const json = await res.json();
+  
+    console.log('📝 Respuesta de verifyRoutesByPresalesmansIds:', json);
+  
+    return json as ApiResponse<any>;
+  }
+  

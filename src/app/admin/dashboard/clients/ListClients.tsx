@@ -27,7 +27,7 @@ import { ApiResponse } from '@/types/shared/api_response';
 import { ClientByAdministratorType } from '@/types/admin/clients/clientType';
 import { Driver } from '@/types/admin/drivers/getDriversType';
 import { getDriversAvailableByAdminId } from '@/services/admin/drivers/adminDriversService';
-import { creeateRouteByDriverAndPresalesman } from '@/services/admin/routing/routingManagementService';
+import { creeateRouteByDriverAndPresalesman, verifyRoutesByPresalesmansIds } from '@/services/admin/routing/routingManagementService';
 
 export default function ListClients() {
   const router = useRouter()
@@ -44,16 +44,49 @@ export default function ListClients() {
 
   const [driversData, setDriversData] = useState<Driver[]>([])
 
+  const [presalesmanRoutesStatus, setPresalesmanRoutesStatus] = useState<{ [key: number]: string }>({})
+
+
+
   useEffect(() => {
     if (!user?.profileId) return
-    const fetchClients = async () => {
-      const response: ApiResponse<ClientByAdministratorType> = await getClientsByAdminId(user.profileId)
-      const responseDrivers: ApiResponse<Driver[]> = await getDriversAvailableByAdminId(user.profileId)
-        setDriversData(responseDrivers.data || [])
+  
+    const fetchData = async () => {
+      try {
+        // Obtener clientes y choferes disponibles
+        const response: ApiResponse<ClientByAdministratorType> = await getClientsByAdminId(user.profileId)
+        const responseDrivers: ApiResponse<Driver[]> = await getDriversAvailableByAdminId(user.profileId)
         setClientData(response.data)
+        setDriversData(responseDrivers.data || [])
+  
+        // Obtener los presalesman_id únicos desde los datos de clientes
+        const presalesmanIds = Object.values(response.data || {})
+          .flat()
+          .map((c) => c.presalesman_id)
+          .filter((id, index, self) => id && self.indexOf(id) === index)
+  
+        // Llamar al endpoint para verificar si ya tienen rutas asignadas
+        const responseVerifyRutesPresalesmans = await verifyRoutesByPresalesmansIds(presalesmanIds)
+       
+   
+        if (responseVerifyRutesPresalesmans.status_code === 200 && responseVerifyRutesPresalesmans.data) {
+          const statusMap = responseVerifyRutesPresalesmans.data.reduce((acc, { presalesman_id, route_status }) => {
+            acc[presalesman_id] = route_status
+            return acc
+          }, {} as { [key: number]: string })
+          setPresalesmanRoutesStatus(statusMap)
+
+
+          console.log('📝 Estado de las rutas de los prevendedores:', statusMap)
+        }
+      } catch (error) {
+        console.error("❌ Error cargando datos de clientes o rutas:", error)
+      }
     }
-    fetchClients()
+  
+    fetchData()
   }, [user?.profileId])
+  
 
   const handleAsignatedDriver = async (choferId: string, presalesman_id: string) => {
     try {
@@ -70,6 +103,12 @@ export default function ListClients() {
         } else {
             toast.error(response.message || 'Ocurrió un error al asignar la cartera')
         }
+
+        setPresalesmanRoutesStatus((prev) => ({
+          ...prev,
+          [parseInt(presalesman_id)]: 'ASSIGNED'
+        }))
+        
       
     } catch (error) {
       console.error(error)
@@ -137,55 +176,73 @@ export default function ListClients() {
           ) : (
             clientData && Object.entries(clientData).map(([prevName, clients]) => {
               const filtered = clients.filter(c => !showOnlyPedidos || c.order_confirmed)
+              const presalesmanId = filtered[0]?.presalesman_id
+              const alreadyAssigned = presalesmanRoutesStatus[presalesmanId] === 'PENDING' || presalesmanRoutesStatus[presalesmanId] === 'ASSIGNED'
+            
               return (
                 <div key={prevName} className="mb-6">
                   <div className="flex justify-between items-center mb-2 bg-[#5E52FF] text-white rounded px-4 py-2">
                     <span className="font-semibold">{prevName}</span>
                     {showOnlyPedidos && filtered.length > 0 && (
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <button className="bg-white text-[#5E52FF] px-3 py-1 rounded text-sm cursor-pointer">Asignar cartera a Chofer</button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="bg-[#7284FB] border-none rounded-[10px]">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-center text-white mb-3">
-                              Asignar para el dia {formattedToday}, la cartera de {prevName} al chofer:
-                            </AlertDialogTitle>
-                            <Select onValueChange={(value) => setSelectedChofer((prev) => ({ ...prev, [prevName]: value }))}>
-                              <SelectTrigger className="w-full bg-white text-[#7284FB]">
-                                <SelectValue placeholder="Selecciona un chofer" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-white text-[#7284FB] mb-6">
-                                {driversData.map((driver) => (
-                                  <SelectItem key={driver.id} value={driver.id}>
-                                    {driver.full_name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter className="flex justify-center w-full space-x-2 mt-5">
-                            <AlertDialogCancel className="text-[#5E52FF] cursor-pointer">Cancelar</AlertDialogCancel>
-                            <AlertDialogAction
-                              className="bg-[#5E52FF] cursor-pointer"
-                              onClick={() => {
-                                const choferId = selectedChofer[prevName]
-                                const presalesmanId = filtered[0]?.presalesman_id
-                            
-                                if (!choferId || !presalesmanId) {
-                                  toast.error("Faltan datos para asignar la cartera.")
-                                  return
-                                }
-                            
-                                handleAsignatedDriver(choferId, presalesmanId.toString())
-                              }}
-                            >
-                              Aceptar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
+                        <div>
+                          {alreadyAssigned ? (
+                            <p className="text-sm italic text-white px-3 py-1 bg-[#5E52FF] rounded">
+                              Ya se programó la ruta
+                            </p>
+                          ) : (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  className="bg-white text-[#5E52FF] px-3 py-1 rounded text-sm cursor-pointer hover:bg-[#f0f0ff]"
+                                >
+                                  Asignar cartera a Chofer
+                                </button>
+                              </AlertDialogTrigger>
+
+                              <AlertDialogContent className="bg-[#7284FB] border-none rounded-[10px]">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-center text-white mb-3">
+                                    Asignar para el día {formattedToday}, la cartera de {prevName} al chofer:
+                                  </AlertDialogTitle>
+                                  <Select onValueChange={(value) => setSelectedChofer((prev) => ({ ...prev, [prevName]: value }))}>
+                                    <SelectTrigger className="w-full bg-white text-[#7284FB]">
+                                      <SelectValue placeholder="Selecciona un chofer" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-white text-[#7284FB] mb-6">
+                                      {driversData.map((driver) => (
+                                        <SelectItem key={driver.id} value={driver.id}>
+                                          {driver.full_name}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="flex justify-center w-full space-x-2 mt-5">
+                                  <AlertDialogCancel className="text-[#5E52FF] cursor-pointer">Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-[#5E52FF] cursor-pointer"
+                                    onClick={() => {
+                                      const choferId = selectedChofer[prevName]
+                                      const presalesmanId = filtered[0]?.presalesman_id
+
+                                      if (!choferId || !presalesmanId) {
+                                        toast.error("Faltan datos para asignar la cartera.")
+                                        return
+                                      }
+
+                                      handleAsignatedDriver(choferId, presalesmanId.toString())
+                                    }}
+                                  >
+                                    Aceptar
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          )}
+                        </div>
+                      )}
+
+
                   </div>
                   {filtered.length > 0 ? (
                     <table className="w-full text-left text-[#7284FB] mb-4">
