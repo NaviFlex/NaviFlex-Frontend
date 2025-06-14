@@ -3,102 +3,40 @@
 import { useEffect, useRef, useState } from 'react';
 import { GoogleMap, Polyline, Marker, useJsApiLoader } from '@react-google-maps/api';
 import { InfoWindow } from '@react-google-maps/api';
+import { obtainRouteFromDayByDriverId } from '@/services/driver/routesManagement';
+import { useUser } from '@/hooks/useUser';
+import { mapOptions} from '@/utils/mapsManagements';
 
 const containerStyle = {
   width: '100%',
   height: '100%',
 };
 
-const mapOptions = {
-    styles: [
-      // Oculta todos los puntos de interés
-      { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
-      { featureType: 'poi.business', elementType: 'all', stylers: [{ visibility: 'off' }] },
-      { featureType: 'poi.school', elementType: 'all', stylers: [{ visibility: 'off' }] },
-      { featureType: 'poi.medical', elementType: 'all', stylers: [{ visibility: 'off' }] },
-  
-      // Oculta líneas de transporte y estaciones
-      { featureType: 'transit', elementType: 'all', stylers: [{ visibility: 'off' }] },
-      { featureType: 'transit.station', elementType: 'all', stylers: [{ visibility: 'off' }] },
-  
-      // Oculta las flechas de dirección y bordes de calles pequeñas
-      { featureType: 'road.local', elementType: 'geometry.stroke', stylers: [{ visibility: 'off' }] },
-      { featureType: 'road.local', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-  
-      // Oculta completamente los nombres de calles vecinales
-      { featureType: 'road.local', elementType: 'labels.text', stylers: [{ visibility: 'off' }] },
-  
-      // Arteriales (avenidas): solo texto en gris claro
-      {
-        featureType: 'road.arterial',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#AAAAAA' }],
-      },
-  
-      // Autopistas: solo texto en gris claro
-      {
-        featureType: 'road.highway',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#AAAAAA' }],
-      },
-  
-      // Quita el borde de texto para que se vea más limpio
-      { featureType: 'road', elementType: 'labels.text.stroke', stylers: [{ visibility: 'off' }] },
-  
-      // Nombres de distritos/barrios en gris suave
-      {
-        featureType: 'administrative.locality',
-        elementType: 'labels.text.fill',
-        stylers: [{ color: '#888888' }],
-      },
-      {
-        featureType: 'administrative.locality',
-        elementType: 'labels.text.stroke',
-        stylers: [{ visibility: 'off' }],
-      },
-  
-      // Oculta subdivisiones menores (urbanizaciones, bloques)
-      { featureType: 'administrative.neighborhood', elementType: 'all', stylers: [{ visibility: 'off' }] },
-      { featureType: 'administrative.land_parcel', elementType: 'all', stylers: [{ visibility: 'off' }] },
-  
-      // Paisaje en gris claro
-      {
-        featureType: 'landscape',
-        elementType: 'all',
-        stylers: [{ saturation: -100 }, { lightness: 60 }],
-      },
-  
-      // Agua en color gris suave
-      {
-        featureType: 'water',
-        elementType: 'all',
-        stylers: [{ color: '#e0e0e0' }],
-      },
-    ],
-    disableDefaultUI: true,
-    zoomControl: true,
-    streetViewControl: false,
-    mapTypeControl: false,
-    fullscreenControl: false,
-  };
-  
-  
-  
 
+  
 const centerDefault = {
-  lat: -12.062362,
-  lng: -77.043603,
+  lat: -8.056098,
+  lng: -79.062921,
 };
 
+const googleMapsLibraries: (
+  "places" | "drawing" | "geometry" | "localContext" | "visualization"
+)[] = ['places'];
+
+
 export default function ViewMapsJordanian() {
+
+  const user = useUser();
+  
+  
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-    libraries: ['places'],
+    libraries: googleMapsLibraries,
   });
 
 
   
-
+  const [hasRoute, setHasRoute] = useState(true);
   const [animatedPath, setAnimatedPath] = useState<google.maps.LatLngLiteral[]>([]);
   const [orderedCoords, setOrderedCoords] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
@@ -108,13 +46,13 @@ export default function ViewMapsJordanian() {
   const animationRef = useRef<number | null>(null);
 
 
-    // Centrar mapa en el usuario
-    const centerMapOnUser = () => {
-        if (userLocation && mapRef.current) {
-          mapRef.current.panTo(userLocation);
-          mapRef.current.setZoom(16);
-        }
-      };
+  // Centrar mapa en el usuario
+  const centerMapOnUser = () => {
+      if (userLocation && mapRef.current) {
+        mapRef.current.panTo(userLocation);
+        mapRef.current.setZoom(16);
+      }
+    };
 
   // Obtener ubicación en tiempo real
   useEffect(() => {
@@ -142,57 +80,78 @@ export default function ViewMapsJordanian() {
     if (!isLoaded) return;
 
     const fetchRoute = async () => {
-      const res = await fetch('/api/driver/routing/jordanian-today-route', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ driver_id: 1, date: '2025-06-09' }),
-      });
+      try {
+        const res = await obtainRouteFromDayByDriverId(user?.profileId || 0);
+        const data = res.data;
 
-      const json = await res.json();
-      const data = json.data;
+        const stopOrder = data.stop_orders;
+        const coords = data.coordinates;
 
-      const depot = { lat: -12.062362, lng: -77.043603 };
-      const stopOrder = data.stop_orders;
-      const coords = data.coordinates;
-      console.log('Coordenadas:', coords);
-      const ordered = stopOrder.map((id: number) => coords.find((c: any) => c.order_id === id));
-
-      console.log(ordered);
-      setOrderedCoords(ordered);
-
-      const origin = depot;
-      const destination = origin;
-      const waypoints = ordered.map((c: any) => ({
-        location: { lat: c.latitude, lng: c.longitude },
-        stopover: true,
-      }));
-
-      const directionsService = new google.maps.DirectionsService();
-
-      directionsService.route(
-        {
-          origin,
-          destination,
-          waypoints,
-          travelMode: google.maps.TravelMode.DRIVING,
-          optimizeWaypoints: false,
-        },
-        (result, status) => {
-          if (status === 'OK' && result.routes.length > 0) {
-            const fullPath: google.maps.LatLng[] = [];
-
-            result.routes[0].legs.forEach((leg) =>
-              leg.steps.forEach((step) =>
-                step.path.forEach((latLng) => fullPath.push(latLng))
-              )
-            );
-
-            animatePath(fullPath);
-          } else {
-            console.error('Error generando la ruta:', status);
-          }
+        if (!stopOrder || stopOrder.length === 0) {
+          setHasRoute(false);
+          return;
         }
-      );
+
+        const ordered = stopOrder.map((id: number) =>
+          coords.find((c: any) => c.order_id === id)
+        );
+        setOrderedCoords(ordered);
+
+        const waypoints = ordered.map((c: any) => ({
+          location: { lat: c.latitude, lng: c.longitude },
+          stopover: true,
+        }));
+
+        const directionsService = new google.maps.DirectionsService();
+        directionsService.route(
+          {
+            origin: centerDefault,
+            destination: centerDefault,
+            waypoints,
+            travelMode: google.maps.TravelMode.DRIVING,
+            optimizeWaypoints: false,
+          },
+          (result, status) => {
+            if (status === 'OK' && result.routes.length > 0) {
+
+
+
+              const legs = result.routes[0].legs;
+
+              let totalDistance = 0; // en metros
+              let totalDuration = 0; // en segundos
+            
+              legs.forEach((leg) => {
+                totalDistance += leg.distance?.value || 0; // distancia en metros
+                totalDuration += leg.duration?.value || 0; // duración en segundos
+              });
+            
+              console.log("🛣️ Distancia total (m):", totalDistance);
+              console.log("⏱️ Duración total (segundos):", totalDuration);
+
+
+
+              const fullPath: google.maps.LatLng[] = [];
+              result.routes[0].legs.forEach((leg) =>
+                leg.steps.forEach((step) =>
+                  step.path.forEach((latLng) => fullPath.push(latLng))
+                )
+              );
+              animatePath(fullPath);
+            } else {
+              console.error('Error generando la ruta:', status);
+              setHasRoute(false);
+            }
+          }
+        );
+      } catch (err: any) {
+        if (err?.response?.status === 404) {
+          console.log('No hay ruta asignada');
+          setHasRoute(false);
+        } else {
+          console.error('Error inesperado:', err);
+        }
+      }
     };
 
     const animatePath = (fullPath: google.maps.LatLng[]) => {
@@ -208,31 +167,28 @@ export default function ViewMapsJordanian() {
         } else {
           if (animationRef.current) clearInterval(animationRef.current);
         }
-      }, 35); // Puedes reducir este valor para más fluidez
+      }, 35);
     };
 
     fetchRoute();
-  }, [isLoaded]);
+  }, [user?.profileId, isLoaded]);
 
   return (
-    <div className="w-full h-full rounded-xl bg-white">
-      <h1 className="text-xl font-bold mb-4">Ruta optimizada para hoy</h1> 
-     
+    <div className="w-full h-full rounded-xl bg-white relative">
+
       <button onClick={centerMapOnUser} className="absolute top-4 right-4 z-10 bg-white p-2 rounded shadow">
         📍 Mi ubicación
-        </button>
+      </button>
 
-      {isLoaded && (
+      {isLoaded && hasRoute ? (
         <GoogleMap
           mapContainerStyle={containerStyle}
           center={centerDefault}
           zoom={15}
           options={mapOptions}
-
-            onLoad={(map) => {
-                mapRef.current = map;
-
-            }}
+          onLoad={(map) => {
+            mapRef.current = map;
+          }}
         >
           <Polyline
             path={animatedPath}
@@ -254,47 +210,46 @@ export default function ViewMapsJordanian() {
             }}
           />
 
-          <Marker 
-            position={centerDefault} 
-            label="Empresa" 
+          <Marker
+            position={centerDefault}
+            label="Empresa"
             icon={{
-                
-                url: "/pasador-de-ubicacion.png", // ruta relativa desde `public/`
-                scaledSize: new window.google.maps.Size(40, 40), // ajusta el tamaño del ícono
-                fillColor: '#FF0000',
-                fillOpacity: 1,
-                strokeWeight: 2,
+              url: "/pasador-de-ubicacion.png",
+              scaledSize: new window.google.maps.Size(40, 40),
+              fillColor: '#FF0000',
+              fillOpacity: 1,
+              strokeWeight: 2,
             }}
           />
-            {orderedCoords.map((coord, i) => (
+
+          {orderedCoords.map((coord, i) => (
             <Marker
-                key={i}
-                position={{ lat: coord.latitude, lng: coord.longitude }}
-                onClick={() => setActiveMarker(i)}
-                icon={{
+              key={i}
+              position={{ lat: coord.latitude, lng: coord.longitude }}
+              onClick={() => setActiveMarker(i)}
+              icon={{
                 url: "/pasador-de-ubicacion.png",
                 scaledSize: new window.google.maps.Size(40, 40),
-                }}
-                label={{
-                text: coord.client_name.split(' ')[0], // Solo primer nombre
+              }}
+              label={{
+                text: coord.client_name.split(' ')[0],
                 fontSize: '11px',
                 fontWeight: 'bold',
                 color: '#333',
-                }}
+              }}
             >
-                {activeMarker === i && (
+              {activeMarker === i && (
                 <InfoWindow
-                    position={{ lat: coord.latitude, lng: coord.longitude }}
-                    onCloseClick={() => setActiveMarker(null)}
+                  position={{ lat: coord.latitude, lng: coord.longitude }}
+                  onCloseClick={() => setActiveMarker(null)}
                 >
-                    <div className="text-sm font-medium max-w-[160px] break-words">
+                  <div className="text-sm font-medium max-w-[160px] break-words">
                     {coord.client_name}
-                    </div>
+                  </div>
                 </InfoWindow>
-                )}
+              )}
             </Marker>
-            ))}
-
+          ))}
 
           {userLocation && (
             <Marker
@@ -309,9 +264,12 @@ export default function ViewMapsJordanian() {
               }}
             />
           )}
-
-
         </GoogleMap>
+      ) : (
+        <div className="flex flex-col justify-center items-center h-full text-center text-[#5E52FF] p-6">
+          <h2 className="text-xl font-semibold mb-2">Aún no tienes una ruta asignada</h2>
+          <p className="text-sm text-gray-600">Tu administrador te asignará una ruta en breve. ¡Gracias por tu paciencia!</p>
+        </div>
       )}
     </div>
   );

@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
 
         const dashboardPaths: Record<string, string> = {
           admin: '/admin/dashboard/drivers',
-          driver: '/drivers/dashboard',
+          driver: '/drivers/dashboard/daily-working-hours',
           presalesman: '/pre-salesmans/dashboard',
         };
 
