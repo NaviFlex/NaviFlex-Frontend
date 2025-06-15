@@ -1,4 +1,5 @@
 export const mapOptions = {
+
     styles: [
       // Oculta todos los puntos de interés
       { featureType: 'poi', elementType: 'all', stylers: [{ visibility: 'off' }] },
@@ -65,8 +66,8 @@ export const mapOptions = {
       },
     ],
     disableDefaultUI: true,
-    zoomControl: true,
-    streetViewControl: false,
-    mapTypeControl: false,
     fullscreenControl: false,
+    zoomControl: false,            // Solo oculta los botones de zoom
+    streetViewControl: false,      // (opcional) quita ícono Street View
+    mapTypeControl: false
   };

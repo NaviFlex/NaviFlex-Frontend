@@ -6,6 +6,8 @@ import { InfoWindow } from '@react-google-maps/api';
 import { obtainRouteFromDayByDriverId } from '@/services/driver/routesManagement';
 import { useUser } from '@/hooks/useUser';
 import { mapOptions} from '@/utils/mapsManagements';
+import { ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/solid';
+import ChatWindow from './ChatWindow';
 
 const containerStyle = {
   width: '100%',
@@ -35,12 +37,14 @@ export default function ViewMapsJordanian() {
   });
 
 
-  
+  const [showChat, setShowChat] = useState(false);
+
   const [hasRoute, setHasRoute] = useState(true);
   const [animatedPath, setAnimatedPath] = useState<google.maps.LatLngLiteral[]>([]);
   const [orderedCoords, setOrderedCoords] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
+  const [ordersData, setOrdersData] = useState<any[]>([]);
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -86,6 +90,16 @@ export default function ViewMapsJordanian() {
 
         const stopOrder = data.stop_orders;
         const coords = data.coordinates;
+        
+        //de coordinates, estraer el ordeR_id, client_name, order_code y document_number_client
+        const orders = coords.map((c: any) => ({
+          order_id: c.order_id,
+          client_name: c.client_name,
+          order_code: c.order_code,
+          document_number_client: c.document_number_client,
+        }));
+
+        setOrdersData(orders);
 
         if (!stopOrder || stopOrder.length === 0) {
           setHasRoute(false);
@@ -113,22 +127,6 @@ export default function ViewMapsJordanian() {
           },
           (result, status) => {
             if (status === 'OK' && result.routes.length > 0) {
-
-
-
-              const legs = result.routes[0].legs;
-
-              let totalDistance = 0; // en metros
-              let totalDuration = 0; // en segundos
-            
-              legs.forEach((leg) => {
-                totalDistance += leg.distance?.value || 0; // distancia en metros
-                totalDuration += leg.duration?.value || 0; // duración en segundos
-              });
-            
-              console.log("🛣️ Distancia total (m):", totalDistance);
-              console.log("⏱️ Duración total (segundos):", totalDuration);
-
 
 
               const fullPath: google.maps.LatLng[] = [];
@@ -174,7 +172,7 @@ export default function ViewMapsJordanian() {
   }, [user?.profileId, isLoaded]);
 
   return (
-    <div className="w-full h-full rounded-xl bg-white relative">
+    <div className="w-full h-full rounded-[20px] bg-white relative">
 
       <button onClick={centerMapOnUser} className="absolute top-4 right-4 z-10 bg-white p-2 rounded shadow">
         📍 Mi ubicación
@@ -265,12 +263,32 @@ export default function ViewMapsJordanian() {
             />
           )}
         </GoogleMap>
+
+
+          
+
       ) : (
         <div className="flex flex-col justify-center items-center h-full text-center text-[#5E52FF] p-6">
           <h2 className="text-xl font-semibold mb-2">Aún no tienes una ruta asignada</h2>
           <p className="text-sm text-gray-600">Tu administrador te asignará una ruta en breve. ¡Gracias por tu paciencia!</p>
         </div>
       )}
+
+
+<ChatBubbleOvalLeftEllipsisIcon 
+  onClick={() => setShowChat(true)}
+  aria-label="Abrir ChatBot"
+  className="absolute bottom-6 right-6 text-[#5E52FF] w-15 h-15 cursor-pointer hover:scale-105 transition-transform"
+/>
+
+{showChat && (
+  <ChatWindow
+    onClose={() => setShowChat(false)}
+    orders={ordersData} // le pasas los datos necesarios al Chat
+  />
+)}
+
+
     </div>
   );
 }
