@@ -8,6 +8,8 @@ import { useUser } from '@/hooks/useUser';
 import { mapOptions} from '@/utils/mapsManagements';
 import { ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/solid';
 import ChatWindow from './ChatWindow';
+import {SpinnerComponent} from '@/components/ui/spinner';
+import { Navigation, BotMessageSquare  } from 'lucide-react';
 
 const containerStyle = {
   width: '100%',
@@ -29,6 +31,8 @@ const googleMapsLibraries: (
 export default function ViewMapsJordanian() {
 
   const user = useUser();
+
+
   
   
   const { isLoaded } = useJsApiLoader({
@@ -40,6 +44,7 @@ export default function ViewMapsJordanian() {
   const [showChat, setShowChat] = useState(false);
 
   const [hasRoute, setHasRoute] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [animatedPath, setAnimatedPath] = useState<google.maps.LatLngLiteral[]>([]);
   const [orderedCoords, setOrderedCoords] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
@@ -59,37 +64,47 @@ export default function ViewMapsJordanian() {
     };
 
   // Obtener ubicación en tiempo real
+  //useEffect(() => {
+  //  if (!isLoaded) return;
+//
+  //  const watchId = navigator.geolocation.watchPosition(
+  //    (position) => {
+  //      setUserLocation({
+  //        lat: position.coords.latitude,
+  //        lng: position.coords.longitude,
+  //      });
+  //      setLoading(false);
+  //    },
+  //    (err) => {
+  //      console.warn('Error obteniendo ubicación:', err);
+  //    },
+  //    { enableHighAccuracy: true, maximumAge: 0 }
+  //  );
+//
+  //  return () => {
+  //    navigator.geolocation.clearWatch(watchId);
+  //  };
+  //}, [isLoaded]);
+
   useEffect(() => {
     if (!isLoaded) return;
 
-    const watchId = navigator.geolocation.watchPosition(
-      (position) => {
-        setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      (err) => {
-        console.warn('Error obteniendo ubicación:', err);
-      },
-      { enableHighAccuracy: true, maximumAge: 0 }
-    );
-
-    return () => {
-      navigator.geolocation.clearWatch(watchId);
-    };
-  }, [isLoaded]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-
+    //activar el spinner
+    
     const fetchRoute = async () => {
+      setLoading(true);
       try {
         const res = await obtainRouteFromDayByDriverId(user?.profileId || 0);
         const data = res.data;
 
         const stopOrder = data.stop_orders;
         const coords = data.coordinates;
+
+        if (!stopOrder || stopOrder.length === 0) {
+          setHasRoute(false);
+          setLoading(false);
+          return;
+        }
         
         //de coordinates, estraer el ordeR_id, client_name, order_code y document_number_client
         const orders = coords.map((c: any) => ({
@@ -101,20 +116,21 @@ export default function ViewMapsJordanian() {
 
         setOrdersData(orders);
 
-        if (!stopOrder || stopOrder.length === 0) {
-          setHasRoute(false);
-          return;
-        }
+
 
         const ordered = stopOrder.map((id: number) =>
           coords.find((c: any) => c.order_id === id)
         );
         setOrderedCoords(ordered);
 
+        console.log('Coordenadas ordenadas:', ordered);
+
         const waypoints = ordered.map((c: any) => ({
           location: { lat: c.latitude, lng: c.longitude },
           stopover: true,
         }));
+
+
 
         const directionsService = new google.maps.DirectionsService();
         directionsService.route(
@@ -126,8 +142,7 @@ export default function ViewMapsJordanian() {
             optimizeWaypoints: false,
           },
           (result, status) => {
-            if (status === 'OK' && result.routes.length > 0) {
-
+            if (status === 'OK' && result.routes?.length > 0) {
 
               const fullPath: google.maps.LatLng[] = [];
               result.routes[0].legs.forEach((leg) =>
@@ -135,19 +150,47 @@ export default function ViewMapsJordanian() {
                   step.path.forEach((latLng) => fullPath.push(latLng))
                 )
               );
+
+
+              let totalDuration = 0;
+              let totalDistance = 0;
+            
+              result.routes[0].legs.forEach((leg) => {
+                totalDuration += leg.duration?.value || 0; // duración en segundos
+                totalDistance += leg.distance?.value || 0;  // distancia en metros
+            
+                leg.steps.forEach((step) =>
+                  step.path.forEach((latLng) => fullPath.push(latLng))
+                );
+              });
+            
+              const totalMinutes = totalDuration //Math.round(totalDuration / 60);
+              const totalKm =totalDistance //(totalDistance / 1000).toFixed(2); // en kilómetros con 2 decimales
+            
+              console.log(`⏱️ Tiempo estimado total: ${totalMinutes} segundos`);
+              console.log(`🛣️ Distancia estimada total: ${totalKm} m`);
+
+
+
               animatePath(fullPath);
             } else {
-              console.error('Error generando la ruta:', status);
               setHasRoute(false);
             }
           }
+
+
+          
         );
-      } catch (err: any) {
+
+        setLoading(false);
+
+      } catch (err: ApiResponse) {
         if (err?.response?.status === 404) {
-          console.log('No hay ruta asignada');
           setHasRoute(false);
+          setLoading(false);
         } else {
-          console.error('Error inesperado:', err);
+          setHasRoute(false);
+          setLoading(false);
         }
       }
     };
@@ -169,126 +212,139 @@ export default function ViewMapsJordanian() {
     };
 
     fetchRoute();
+
   }, [user?.profileId, isLoaded]);
 
   return (
-    <div className="w-full h-full rounded-[20px] bg-white relative">
+    <>
+    { loading ? (
+        <SpinnerComponent />
+      ) : (
+      
+      <div className="w-full h-full rounded-[20px] bg-white relative">
 
-      <button onClick={centerMapOnUser} className="absolute top-4 right-4 z-10 bg-white p-2 rounded shadow">
-        📍 Mi ubicación
-      </button>
 
-      {isLoaded && hasRoute ? (
-        <GoogleMap
-          mapContainerStyle={containerStyle}
-          center={centerDefault}
-          zoom={15}
-          options={mapOptions}
-          onLoad={(map) => {
-            mapRef.current = map;
-          }}
-        >
-          <Polyline
-            path={animatedPath}
-            options={{
-              strokeColor: '#5E52FF',
-              strokeOpacity: 1.0,
-              strokeWeight: 5,
-              icons: [
-                {
-                  icon: {
-                    path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                    scale: 3,
-                    strokeColor: '#5E52FF',
-                  },
-                  offset: '100%',
-                  repeat: '100px',
-                },
-              ],
-            }}
-          />
+        {isLoaded && hasRoute ? (
 
-          <Marker
-            position={centerDefault}
-            label="Empresa"
-            icon={{
-              url: "/pasador-de-ubicacion.png",
-              scaledSize: new window.google.maps.Size(40, 40),
-              fillColor: '#FF0000',
-              fillOpacity: 1,
-              strokeWeight: 2,
-            }}
-          />
+          <div className="relative w-full h-full">
 
-          {orderedCoords.map((coord, i) => (
-            <Marker
-              key={i}
-              position={{ lat: coord.latitude, lng: coord.longitude }}
-              onClick={() => setActiveMarker(i)}
-              icon={{
-                url: "/pasador-de-ubicacion.png",
-                scaledSize: new window.google.maps.Size(40, 40),
-              }}
-              label={{
-                text: coord.client_name.split(' ')[0],
-                fontSize: '11px',
-                fontWeight: 'bold',
-                color: '#333',
-              }}
-            >
-              {activeMarker === i && (
-                <InfoWindow
-                  position={{ lat: coord.latitude, lng: coord.longitude }}
-                  onCloseClick={() => setActiveMarker(null)}
+              <button onClick={centerMapOnUser} className="absolute top-4 right-4 z-10 bg-white p-2 rounded shadow">
+              <Navigation className="w-6 h-6 text-[#5E52FF]" />
+              </button>
+
+              <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={centerDefault}
+                zoom={15}
+                options={mapOptions}
+                onLoad={(map) => {
+                  mapRef.current = map;
+                }}
                 >
-                  <div className="text-sm font-medium max-w-[160px] break-words">
-                    {coord.client_name}
-                  </div>
-                </InfoWindow>
-              )}
-            </Marker>
-          ))}
+                <Polyline
+                  path={animatedPath}
+                  options={{
+                    strokeColor: '#5E52FF',
+                    strokeOpacity: 1.0,
+                    strokeWeight: 5,
+                    icons: [
+                      {
+                        icon: {
+                          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                          scale: 3,
+                          strokeColor: '#5E52FF',
+                        },
+                        offset: '100%',
+                        repeat: '100px',
+                      },
+                    ],
+                  }}
+                />
 
-          {userLocation && (
-            <Marker
-              position={userLocation}
-              icon={{
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: 8,
-                fillColor: '#4285F4',
-                fillOpacity: 1,
-                strokeColor: 'white',
-                strokeWeight: 2,
-              }}
-            />
-          )}
-        </GoogleMap>
+                <Marker
+                  position={centerDefault}
+                  label="Empresa"
+                  icon={{
+                    url: "/pasador-de-ubicacion.png",
+                    scaledSize: new window.google.maps.Size(40, 40),
+                    fillColor: '#FF0000',
+                    fillOpacity: 1,
+                    strokeWeight: 2,
+                  }}
+                />
+
+                {orderedCoords.map((coord, i) => (
+                  <Marker
+                    key={i}
+                    position={{ lat: coord.latitude, lng: coord.longitude }}
+                    onClick={() => setActiveMarker(i)}
+                    icon={{
+                      url: "/pasador-de-ubicacion.png",
+                      scaledSize: new window.google.maps.Size(40, 40),
+                    }}
+                    label={{
+                      text: coord.client_name.split(' ')[0],
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      color: '#333',
+                    }}
+                  >
+                    {activeMarker === i && (
+                      <InfoWindow
+                        position={{ lat: coord.latitude, lng: coord.longitude }}
+                        onCloseClick={() => setActiveMarker(null)}
+                      >
+                        <div className="text-sm font-medium max-w-[160px] break-words">
+                          {coord.client_name}
+                        </div>
+                      </InfoWindow>
+                    )}
+                  </Marker>
+                ))}
+
+                {userLocation && (
+                  <Marker
+                    position={userLocation}
+                    icon={{
+                      path: google.maps.SymbolPath.CIRCLE,
+                      scale: 8,
+                      fillColor: '#4285F4',
+                      fillOpacity: 1,
+                      strokeColor: 'white',
+                      strokeWeight: 2,
+                    }}
+                  />
+                )}
+              </GoogleMap>
+
+              <BotMessageSquare 
+                onClick={() => setShowChat(true)}
+                aria-label="Abrir ChatBot"
+                className="absolute bottom-6 right-6 text-[#5E52FF] w-15 h-15 cursor-pointer hover:scale-105 transition-transform"
+              />
+
+              {showChat && (
+                <ChatWindow
+                  onClose={() => setShowChat(false)}
+                  orders={ordersData} // le pasas los datos necesarios al Chat
+                />
+              )}
+        </div>
+
+        ) : (
+          <div className="flex flex-col justify-center items-center h-full text-center text-[#5E52FF] p-6">
+            <h2 className="text-xl font-semibold mb-2">Aún no tienes una ruta asignada</h2>
+            <p className="text-sm text-gray-600">Tu administrador te asignará una ruta en breve. ¡Gracias por tu paciencia!</p>
+          </div>
+        )}
 
 
           
 
-      ) : (
-        <div className="flex flex-col justify-center items-center h-full text-center text-[#5E52FF] p-6">
-          <h2 className="text-xl font-semibold mb-2">Aún no tienes una ruta asignada</h2>
-          <p className="text-sm text-gray-600">Tu administrador te asignará una ruta en breve. ¡Gracias por tu paciencia!</p>
-        </div>
-      )}
-
-
-<ChatBubbleOvalLeftEllipsisIcon 
-  onClick={() => setShowChat(true)}
-  aria-label="Abrir ChatBot"
-  className="absolute bottom-6 right-6 text-[#5E52FF] w-15 h-15 cursor-pointer hover:scale-105 transition-transform"
-/>
-
-{showChat && (
-  <ChatWindow
-    onClose={() => setShowChat(false)}
-    orders={ordersData} // le pasas los datos necesarios al Chat
-  />
-)}
-
 
     </div>
+      )
+    }
+</>
   );
 }
