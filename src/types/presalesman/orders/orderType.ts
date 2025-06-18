@@ -10,3 +10,10 @@ export interface OrderType{
     presalesmans_id: number
     routes_id: number | null
 }
+
+
+export interface Order{
+    order_id: number
+    order_code: string
+    client_name: string
+}

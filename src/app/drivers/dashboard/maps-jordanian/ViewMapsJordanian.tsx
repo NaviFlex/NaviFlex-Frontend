@@ -6,10 +6,11 @@ import { InfoWindow } from '@react-google-maps/api';
 import { obtainRouteFromDayByDriverId } from '@/services/driver/routesManagement';
 import { useUser } from '@/hooks/useUser';
 import { mapOptions} from '@/utils/mapsManagements';
-import { ChatBubbleOvalLeftEllipsisIcon } from '@heroicons/react/24/solid';
 import ChatWindow from './ChatWindow';
+import { ApiResponse } from '@/types/shared/api_response';
 import {SpinnerComponent} from '@/components/ui/spinner';
 import { Navigation, BotMessageSquare  } from 'lucide-react';
+import { useCallback } from 'react';
 
 const containerStyle = {
   width: '100%',
@@ -31,25 +32,21 @@ const googleMapsLibraries: (
 export default function ViewMapsJordanian() {
 
   const user = useUser();
-
-
-  
-  
   const { isLoaded } = useJsApiLoader({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
     libraries: googleMapsLibraries,
   });
 
 
-  const [showChat, setShowChat] = useState(false);
 
+  const [showChat, setShowChat] = useState(false);
   const [hasRoute, setHasRoute] = useState(true);
   const [loading, setLoading] = useState(true);
   const [animatedPath, setAnimatedPath] = useState<google.maps.LatLngLiteral[]>([]);
   const [orderedCoords, setOrderedCoords] = useState<any[]>([]);
-  const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
   const [activeMarker, setActiveMarker] = useState<number | null>(null);
   const [ordersData, setOrdersData] = useState<any[]>([]);
+  const [userLocation, setUserLocation] = useState<google.maps.LatLngLiteral | null>(null);
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -62,6 +59,62 @@ export default function ViewMapsJordanian() {
         mapRef.current.setZoom(16);
       }
     };
+
+ // Primero, define drawNewRoute con useCallback
+  const drawNewRoute = useCallback((coords: any[]) => {
+    const waypoints = coords.map((c) => ({
+      location: { lat: c.latitude, lng: c.longitude },
+      stopover: true,
+    }));
+
+    const directionsService = new google.maps.DirectionsService();
+    directionsService.route(
+      {
+        origin: userLocation || centerDefault,
+        destination: centerDefault,
+        waypoints,
+        travelMode: google.maps.TravelMode.DRIVING,
+        optimizeWaypoints: false,
+      },
+      (result, status) => {
+        if (status === "OK" && result.routes?.length > 0) {
+          const fullPath: google.maps.LatLng[] = [];
+          result.routes[0].legs.forEach((leg) =>
+            leg.steps.forEach((step) =>
+              step.path.forEach((latLng) => fullPath.push(latLng))
+            )
+          );
+          animatePath(fullPath);
+        }
+      }
+    );
+  }, [userLocation]);
+
+  // Luego el handler también con useCallback
+  const handler = useCallback((event: Event) => {
+    const customEvent = event as CustomEvent;
+    const { coords } = customEvent.detail;
+    console.log('Evento recibido para reoptimizar:', customEvent.detail);
+    setOrderedCoords(coords);
+    drawNewRoute(coords);
+  }, [drawNewRoute]);
+
+
+  const animatePath = (fullPath: google.maps.LatLng[]) => {
+    let index = 0;
+    setAnimatedPath([]);
+    if (animationRef.current) clearInterval(animationRef.current);
+
+    animationRef.current = window.setInterval(() => {
+      if (index < fullPath.length) {
+        const next = fullPath[index].toJSON();
+        setAnimatedPath((prev) => [...prev, next]);
+        index++;
+      } else {
+        if (animationRef.current) clearInterval(animationRef.current);
+      }
+    }, 35);
+  };
 
   // Obtener ubicación en tiempo real
   //useEffect(() => {
@@ -86,10 +139,15 @@ export default function ViewMapsJordanian() {
   //  };
   //}, [isLoaded]);
 
+
+
+
+
+
+
+
   useEffect(() => {
     if (!isLoaded) return;
-
-    //activar el spinner
     
     const fetchRoute = async () => {
       setLoading(true);
@@ -116,14 +174,11 @@ export default function ViewMapsJordanian() {
 
         setOrdersData(orders);
 
-
-
         const ordered = stopOrder.map((id: number) =>
           coords.find((c: any) => c.order_id === id)
         );
         setOrderedCoords(ordered);
 
-        console.log('Coordenadas ordenadas:', ordered);
 
         const waypoints = ordered.map((c: any) => ({
           location: { lat: c.latitude, lng: c.longitude },
@@ -152,34 +207,29 @@ export default function ViewMapsJordanian() {
               );
 
 
-              let totalDuration = 0;
-              let totalDistance = 0;
-            
-              result.routes[0].legs.forEach((leg) => {
-                totalDuration += leg.duration?.value || 0; // duración en segundos
-                totalDistance += leg.distance?.value || 0;  // distancia en metros
-            
-                leg.steps.forEach((step) =>
-                  step.path.forEach((latLng) => fullPath.push(latLng))
-                );
-              });
-            
-              const totalMinutes = totalDuration //Math.round(totalDuration / 60);
-              const totalKm =totalDistance //(totalDistance / 1000).toFixed(2); // en kilómetros con 2 decimales
-            
-              console.log(`⏱️ Tiempo estimado total: ${totalMinutes} segundos`);
-              console.log(`🛣️ Distancia estimada total: ${totalKm} m`);
-
-
+              //let totalDuration = 0;
+              //let totalDistance = 0;
+            //
+              //result.routes[0].legs.forEach((leg) => {
+              //  totalDuration += leg.duration?.value || 0; // duración en segundos
+              //  totalDistance += leg.distance?.value || 0;  // distancia en metros
+            //
+              //  leg.steps.forEach((step) =>
+              //    step.path.forEach((latLng) => fullPath.push(latLng))
+              //  );
+              //});
+            //
+              //const totalMinutes = totalDuration //Math.round(totalDuration / 60);
+              //const totalKm =totalDistance //(totalDistance / 1000).toFixed(2); // en kilómetros con 2 decimales
+            //
+              //console.log(`⏱️ Tiempo estimado total: ${totalMinutes} segundos`);
+              //console.log(`🛣️ Distancia estimada total: ${totalKm} m`);
 
               animatePath(fullPath);
             } else {
               setHasRoute(false);
             }
-          }
-
-
-          
+          } 
         );
 
         setLoading(false);
@@ -195,25 +245,15 @@ export default function ViewMapsJordanian() {
       }
     };
 
-    const animatePath = (fullPath: google.maps.LatLng[]) => {
-      let index = 0;
-      setAnimatedPath([]);
-      if (animationRef.current) clearInterval(animationRef.current);
-
-      animationRef.current = window.setInterval(() => {
-        if (index < fullPath.length) {
-          const next = fullPath[index].toJSON();
-          setAnimatedPath((prev) => [...prev, next]);
-          index++;
-        } else {
-          if (animationRef.current) clearInterval(animationRef.current);
-        }
-      }, 35);
-    };
-
     fetchRoute();
 
+    window.addEventListener("reoptimizeMap", handler);
+    return () => window.removeEventListener("reoptimizeMap", handler);
+
+
   }, [user?.profileId, isLoaded]);
+
+ 
 
   return (
     <>
@@ -327,6 +367,7 @@ export default function ViewMapsJordanian() {
                 <ChatWindow
                   onClose={() => setShowChat(false)}
                   orders={ordersData} // le pasas los datos necesarios al Chat
+                  driverId={user?.profileId || 0}
                 />
               )}
         </div>

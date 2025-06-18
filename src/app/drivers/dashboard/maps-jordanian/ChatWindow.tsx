@@ -2,8 +2,8 @@
 
 import {  useChat } from '@ai-sdk/react';
 import { useEffect, useRef } from 'react'
-
-
+import { interpretarRestricciones } from '@/utils/interpretingRestrictions';
+import { reoptimize_route } from '@/services/driver/routesManagement';
 type Order = {
     order_id: number;
     client_name: string;
@@ -13,8 +13,12 @@ type Order = {
   
 export default function ChatWindow({ onClose, orders }: { 
     onClose: () => void,
-    orders: Order[]
+    orders: Order[],
+    
+    driverId: number
 }) {
+
+  const  [driverIdState, setDriverIdState] = useState<number>(driverId);
 
 
     
@@ -51,9 +55,39 @@ export default function ChatWindow({ onClose, orders }: {
                   Pedidos activos hoy (solo contexto interno, no imprimir): ${pedidosContexto}`
       }
     ],
-    onFinish: (message) => {
-      console.log('📨 Mensaje procesado por el modelo:', message);
+    onFinish: async (message) => {
+      const restricciones = await interpretarRestricciones(message.content, orders);
+    
+      if (restricciones) {
+        const { lat, lng } = JSON.parse(localStorage.getItem("user_location") || "{}");
+    
+        const body = {
+          ...restricciones,
+          driver_lat: lat,
+          driver_lng: lng,
+        };
+    
+        const result = await reoptimize_route( driverIdState, body);
+    
+       
+          const nuevaRuta = result.data.nueva_ruta as number[];
+          const nuevasCoordenadas = nuevaRuta.map((id) =>
+            orders.find((o) => o.order_id === id)
+          );
+    
+          // Emitir evento global para actualizar el mapa
+          window.dispatchEvent(
+            new CustomEvent("reoptimizeMap", {
+              detail: {
+                coords: nuevasCoordenadas,
+                estimadas: result.data.ordenes_con_llegada_estimada,
+              },
+            })
+          );
+        
+      }
     },
+    
     onError: (error) => {
       console.error('❌ Error en el chatbot:', error.message);
     }
