@@ -7,11 +7,10 @@ import { obtainRouteFromDayByDriverId, getRouteChangesByRouteId } from '@/servic
 import { useUser } from '@/hooks/useUser';
 import { mapOptions} from '@/utils/mapsManagements';
 import ChatWindow from './ChatWindow';
-import { ApiResponse } from '@/types/shared/api_response';
 import {SpinnerComponent} from '@/components/ui/spinner';
 import { Navigation, BotMessageSquare  } from 'lucide-react';
 import { useCallback } from 'react';
-
+import { ApiResponse } from '@/types/shared/api_response';
 
 const containerStyle = {
   width: '100%',
@@ -307,7 +306,7 @@ export default function ViewMapsJordanian() {
 
         setLoading(false);
 
-      } catch (err: ApiResponse) {
+      } catch (err: ApiResponse<any>) {
         if (err?.response?.status === 404) {
           setHasRoute(false);
           setLoading(false);

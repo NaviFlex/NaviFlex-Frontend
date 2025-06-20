@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { interpretarRestricciones } from '@/utils/interpretingRestrictions'
 import { reoptimize_route } from '@/services/driver/routesManagement'
+import {  SendHorizonal  } from 'lucide-react';
 
 
 type Order = {
@@ -37,10 +38,16 @@ export default function ChatWindow({
 
   const pedidosContexto = orders
     .map(({ client_name, order_code, order_id }) =>
-      `(${order_id}) ${client_name}:${order_code}`
+      `${order_id}:${client_name}:${order_code}`
     )
     .join(', ')
 
+    useEffect(() => {
+      console.log('Pedidos en contexto:', pedidosContexto);
+      console.log('Cantidad de pedidos:', orders.length);
+    }, [pedidosContexto, orders.length]);
+    
+    
   const {
     messages,
     input,
@@ -56,33 +63,34 @@ export default function ChatWindow({
           Tu función es ayudar a choferes y prevendedores a gestionar rutas de entrega mediante instrucciones escritas en lenguaje natural.
 
           Cada pedido tiene:
-          - Un nombre de cliente (ej. "Fernanda Pardo Carres")
-          - Un código de pedido (ej. "ORD-XXXXXX")
-          - Un identificador único numérico llamado **order_id** (ej. 25, 26, 30)
+          - Order_id:NombreCliente:CodigoPedido
+          - Ejemplo: 25:Fernanda Pardo Carres:ORD-XXXXXX
 
-          ⚠️ Importante:
-          - Responde **solo en formato JSON válido** si el usuario solicita acciones como cancelaciones, prioridades o ventanas de tiempo. Caso contrario, responde como un asistente.
-          - Usa exclusivamente los **order_id** proporcionados en el contexto para referirte a los pedidos en caso respondas con JSON.
+          Importante:
+          - Si el usuario menciona un cliente que no esta en los pedidos activos de hoy, dile o hazle la consulta. Las unicas solicitudes en 
+            cuanto a modificar la ruta que el usuario puede pedir son: cancelaciones, prioridades o ventanas de tiempo, tu tienes que interpretar todas estas solicitudes, responde **solo en formato JSON válido**. Caso contrario, responde como un asistente.
+          - Usa exclusivamente los **order_id** proporcionados en el contexto para referirte a los pedidos del dia en caso respondas con JSON.
           - Para ventanas de tiempo, responde usando pares de segundos: [inicio, fin] (por ejemplo: [28800, 64800]).
           - Si no se indica una ventana especial para un pedido, **no la incluyas** en el JSON.
           - No expliques ni comentes nada fuera del JSON.
 
-          ✅ Cuando detectes que el usuario solicita una acción (como cancelar, priorizar, asignar ventana),
-  responde en formato JSON así (en message pon un mensaje directo, bonito y corto para el usuario, algo como de cambios aplicados correctametne o algo mas armado):
+          Cuando detectes que el usuario solicita una acción (como cancelar, priorizar, asignar ventana),
+          responde en formato JSON así (en message pon un mensaje directo, bonito y corto para el usuario, algo como de cambios aplicados correctametne o algo mas armado):
 
-  {
-    "message": " XXX",
-    "json": {
-      "cancelations": [25],
-      "force_customer": 30,
-      "time_window_overrides": {
-        "30": [32400, 36000]
-      }
-    }
-  }
+              {
+                "message": " XXX",
+                "json": {
+                  "cancelations": [25],
+                  "force_customer": 30,
+                  "time_window_overrides": {
+                    "30": [32400, 36000]
+                  }
+                }
+              }
+          Caso contrario, responde como un asistente normal, sin texto complicado ni en formato json.      
 
 
-          Pedidos activos hoy (solo contexto interno, no imprimir): ${pedidosContexto}
+          Pedidos activos hoy (solo contexto interno, no imprimir,cada pedido esta delimitado por una coma ","): ${pedidosContexto}
         `
       }
     ],
@@ -139,7 +147,7 @@ export default function ChatWindow({
           addCustomMessage('assistant', message.content);
         }
       } catch (err) {
-        addCustomMessage('assistant', '❌ Error al procesar la instrucción.');
+        //addCustomMessage('assistant', '❌ Error al procesar la instrucción.');
       }
     }
     
@@ -163,12 +171,12 @@ export default function ChatWindow({
 
   return (
     <div className="fixed bottom-20 right-6 w-[360px] h-[500px] bg-white rounded-lg shadow-lg z-50 flex flex-col border">
-      <div className="flex justify-between items-center p-3 border-b">
-        <h2 className="font-semibold text-[#5E52FF]">NaviGPT</h2>
-        <button onClick={onClose} className="text-gray-500 hover:text-gray-700">✕</button>
+      <div className="flex justify-between items-center p-3 border-b bg-[#5E52FF]">
+        <h2 className="font-semibold w-full text-white text-center">NaviGPT</h2>
+        <button onClick={onClose} className="text-white hover:text-gray-700">✕</button>
       </div>
 
-      <div className="flex-1 p-3 overflow-y-auto text-sm space-y-2">
+      <div className="flex-1 p-3 overflow-y-auto text-sm space-y-2 bg-[#5E52FF]">
       {[...messages, ...customMessages]
   .filter((m) => m.role !== 'system')
   .sort((a, b) => {
@@ -177,6 +185,7 @@ export default function ChatWindow({
     return aTime - bTime;
   })
   .map((m, i) => {
+    
     if (
       m.role === 'assistant' &&
       isJson(m.content) &&
@@ -194,7 +203,7 @@ export default function ChatWindow({
 
     return (
       <div key={i} className={m.role === 'user' ? 'text-right' : 'text-left'}>
-        <span className={`inline-block px-3 py-2 rounded-lg ${m.role === 'user' ? 'bg-[#E5E5FF]' : 'bg-[#F0F0F0]'}`}>
+        <span className={`text-[#5E52FF] max-w-[80%] mb-2  inline-block px-3 py-2 rounded-lg ${m.role === 'user' ? 'bg-white mb-2' : 'bg-white'}`}>
           {m.content}
         </span>
       </div>
@@ -212,17 +221,19 @@ export default function ChatWindow({
             originalHandleSubmit(e)
           }
         }}
-        className="p-3 border-t flex gap-2"
+        className="p-3 border-t flex gap-2 bg-[#5E52FF] flex items-center"
       >
         <input
           value={input}
           onChange={handleInputChange}
-          className="flex-1 border rounded px-3 py-2 text-sm outline-none"
+          className="flex-1 border rounded px-3 py-2 text-sm outline-none bg-white"
           placeholder="Escribe una instrucción..."
         />
-        <button type="submit" className="text-[#5E52FF] font-semibold">
-          Enviar
-        </button>
+
+        <SendHorizonal type="submit" className="text-white font-semibold"
+          
+        />
+
       </form>
     </div>
   )
