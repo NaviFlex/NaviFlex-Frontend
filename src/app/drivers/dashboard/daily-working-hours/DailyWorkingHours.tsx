@@ -11,12 +11,7 @@ export default function DriverAssignedOrders() {
 
     const user = useUser();
     
-    const assignedOrders = [
-      { name: "Cliente 1", address: "XXXXXXXXXXXXXXX", orderNumber: "XXXXXXXXX" },
-      { name: "Cliente 2", address: "XXXXXXXXXXXXXXX", orderNumber: "XXXXXXXXX" },
-      { name: "Cliente 3", address: "XXXXXXXXXXXXXXX", orderNumber: "XXXXXXXXX" },
-      { name: "Cliente 4", address: "XXXXXXXXXXXXXXX", orderNumber: "XXXXXXXXX" },
-    ];
+  
 
     const [loading, setLoading] = useState(true);
     const [ordersData, setOrdersData] = useState<any[]>([]);

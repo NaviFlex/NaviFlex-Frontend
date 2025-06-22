@@ -63,7 +63,7 @@ export default function ClientPortfolio() {
         onClose={() => setShowSuccess(false)}
       />
 
-      <div className="w-full h-full rounded-[12px] bg-white p-4">
+      <div className="w-full h-auto rounded-[12px] bg-white p-4">
         <h1 className="text-xl font-bold text-center text-[#5E52FF] mb-4">Clientes gestionados</h1>
 
         <div className="flex items-center mb-1 border rounded px-2 bg-[#5E52FF]">
