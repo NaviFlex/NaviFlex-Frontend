@@ -7,7 +7,7 @@ export async function obtainRouteFromDayByPresalesmanId(
     
 
 
-    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}/routes/obtain_daily_jordanian_route_prevende`, {
+    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}/routes/obtain_daily_jordanian_route_presalesman`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

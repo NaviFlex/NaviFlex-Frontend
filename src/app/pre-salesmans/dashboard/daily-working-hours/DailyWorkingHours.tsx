@@ -6,7 +6,8 @@ import { obtainRouteFromDayByPresalesmanId} from '@/services/presalesman/daily-w
 import { ApiResponse } from "@/types/shared/api_response";
 import { useEffect, useState } from "react";
 import { SpinnerComponent } from '@/components/ui/spinner';
-
+import {  BotMessageSquare  } from 'lucide-react';
+import ChatWindow from './ChatWindow';
 
 export default function DailyWorkingHours() {
     
@@ -15,7 +16,9 @@ export default function DailyWorkingHours() {
     const [ordersData, setOrdersData] = useState<any[]>([])
     const [ hasRoute, setHasRoute] = useState(true);
     const [ jordanianData, setJordanianData] = useState<any>(null);
-
+    const [showChat, setShowChat] = useState(false);
+    const [routeId, setRouteId] = useState<any>(null);
+    const [ presalesmanName, setPresalesmanName] = useState<string>()
 
     useEffect(() => {
 
@@ -28,7 +31,13 @@ export default function DailyWorkingHours() {
                 if (response_route_original.status_code === 200) {
                   setOrdersData(response_route_original.data.coordinates || []);
                   setJordanianData(response_route_original.data);
+                  setRouteId(response_route_original.data.id)
                   setHasRoute(true);
+
+                 //obtener data del localStorage
+                 const dataLocalStorage = JSON.parse(localStorage.getItem('userData') || '{}'); // Fixed the string syntax
+                 setPresalesmanName(dataLocalStorage.full_name + dataLocalStorage.last_names || ''); // Assuming the name is stored under this key
+
                 } else if (response_route_original.status_code === 404) {
                   setHasRoute(false);
                   setOrdersData([]);
@@ -109,6 +118,24 @@ export default function DailyWorkingHours() {
                                         </div>
                                     ))}
                                 </div>
+
+                                <BotMessageSquare 
+                                    onClick={() => setShowChat(true)}
+                                    aria-label="Abrir ChatBot"
+                                    className="absolute bottom-6 mb-5 right-6 text-[#5E52FF] w-15 h-15 cursor-pointer hover:scale-105 transition-transform"
+                                />
+
+                                {showChat && (
+                                    <ChatWindow
+                                    onClose={() => setShowChat(false)}
+                                    orders={ordersData} // le pasas los datos necesarios al Chat
+                                    presaleman_name={presalesmanName || 'Desconocido'}
+                                    routeId={routeId}
+                                    driverId= {jordanianData.drivers_id}
+                                    presalesmanId={user?.profileId || 0}
+                                    />
+                                )}
+
                             </div>
                         ):(
                             <div className="flex flex-col justify-center items-center h-full text-center text-[#5E52FF] p-6">

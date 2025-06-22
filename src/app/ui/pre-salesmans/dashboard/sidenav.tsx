@@ -4,7 +4,7 @@ import { ArrowRightStartOnRectangleIcon ,UserCircleIcon } from '@heroicons/react
 import {useRouter} from "next/navigation";
 import { useEffect, useState } from 'react';
 
-export default function SideNav() {
+export default function SideNav({ onCloseMobile }: { onCloseMobile?: () => void }) {
   const router = useRouter();
     const [userData, setUserData] = useState<any>(null)
     useEffect(() => {
@@ -30,12 +30,12 @@ export default function SideNav() {
         <hr className="border-indigo-200 mb-4" />
 
             {/* Aquí va NavLinks */}
-            <NavLinks />
+            <NavLinks onClickLink={onCloseMobile}  />
 
         <hr className="border-indigo-200 mb-4" />
 
-        <div className="w-full h-full flex flex-col justify-between items-center ">
-            <div></div>
+        <div className="w-full h-full flex flex-col justify-between items-center mb-5 ">
+            <div className=""></div>
             <button
             onClick={() => {
               // 1. Borrar cookie (expirarla manualmente)

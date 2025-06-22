@@ -23,7 +23,7 @@ const links = [
 ]
 
 
-export default function NavLinks() {
+export default function NavLinks({ onClickLink }: { onClickLink?: () => void }) {
   const pathname =usePathname()
   return (
     <div>
@@ -33,6 +33,7 @@ export default function NavLinks() {
           <div key={link.name}>
             <Link
               href={link.href}
+              onClick={onClickLink}
               className={`flex h-[48px] grow items-center justify-center gap-2 rounded-md 
                 p-2 text-sm text-[#5E52FF] font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3
                 transition transform duration-150 ease-in-out active:scale-107

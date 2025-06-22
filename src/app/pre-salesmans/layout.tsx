@@ -9,7 +9,7 @@ export default async function DriversLayout({
     //}
   
     return (
-      <div className="h-screen pt-8 pb-8 pl-6 pr-6 ">
+      <div className="h-screen md:pt-8 md:pb-8 md:pl-6 md:pr-6 ">
         {children}
       </div>
     )

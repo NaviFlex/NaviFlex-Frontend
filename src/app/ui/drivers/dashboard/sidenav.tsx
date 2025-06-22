@@ -34,7 +34,7 @@ export default function SideNav({ onCloseMobile }: { onCloseMobile?: () => void 
       <hr className="border-indigo-200 mb-4" />
 
       <div className="w-full h-full flex flex-col justify-between items-center pb-4">
-        <div />
+      <div className="d"></div>
         <button
           onClick={() => {
             document.cookie = 'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
