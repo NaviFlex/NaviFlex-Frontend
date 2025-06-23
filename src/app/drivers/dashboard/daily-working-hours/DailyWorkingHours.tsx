@@ -32,8 +32,10 @@ export default function DriverAssignedOrders() {
 
                 setLoading(false);
 
-            } catch (err: ApiResponse <any>){
-                if (err?.response?.status === 404) {
+            } catch (err: unknown){
+                const apiError = err as ApiResponse<any>;
+
+                if (apiError?.status_code === 404) {
                     setHasRoute(false);
                     setLoading(false);
                   } else {
