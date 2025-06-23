@@ -63,7 +63,9 @@ export default function ListClients() {
         const presalesmanIds = Object.values(response.data || {})
           .flat()
           .map((c) => c.presalesman_id)
-          .filter((id, index, self) => id && self.indexOf(id) === index)
+          .filter((id): id is number => typeof id === "number") // Garantiza solo números
+          .filter((id, index, self) => self.indexOf(id) === index); // Elimina duplicados
+      
   
         // Llamar al endpoint para verificar si ya tienen rutas asignadas
         const responseVerifyRutesPresalesmans = await verifyRoutesByPresalesmansIds(presalesmanIds)
