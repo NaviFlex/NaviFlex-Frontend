@@ -26,7 +26,6 @@ export async function POST(request) {
         clientesConfirmados: clientsIds.map(id => parseInt(id))
     };
 
-    existingRoutes.push(newRoute);
 
     fs.writeFileSync(filePath, JSON.stringify(existingRoutes, null, 2));
 
