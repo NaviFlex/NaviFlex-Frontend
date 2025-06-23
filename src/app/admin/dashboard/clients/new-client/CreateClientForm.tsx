@@ -17,7 +17,6 @@ import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue,} from '@/comp
 import { Button } from '@/components/ui/button'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Library } from '@react-google-maps/api';
 import { createClient } from '@/services/admin/clients/clientsService';
 
 
@@ -34,7 +33,7 @@ const centerDefault = {
     lng: -77.0427931
   };
 
-  const googleMapsLibraries: Library[] = ['places'];
+  const googleMapsLibraries = ['places'] satisfies Array<'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'>;
 
   
 
