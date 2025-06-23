@@ -212,7 +212,7 @@ export default function ListClients() {
                                     </SelectTrigger>
                                     <SelectContent className="bg-white text-[#7284FB] mb-6">
                                       {driversData.map((driver) => (
-                                        <SelectItem key={driver.id} value={driver.id}>
+                                        <SelectItem key={driver.id} value={driver.id.toString()}>
                                           {driver.full_name}
                                         </SelectItem>
                                       ))}
