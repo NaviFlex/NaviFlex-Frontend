@@ -179,7 +179,7 @@ export default function ListClients() {
             clientData && Object.entries(clientData).map(([prevName, clients]) => {
               const filtered = clients.filter(c => !showOnlyPedidos || c.order_confirmed)
               const presalesmanId = filtered[0]?.presalesman_id
-              const alreadyAssigned = presalesmanRoutesStatus[presalesmanId] === 'PENDING' || presalesmanRoutesStatus[presalesmanId] === 'ASSIGNED'
+              const alreadyAssigned = presalesmanId != null && (presalesmanRoutesStatus[presalesmanId] === 'PENDING' || presalesmanRoutesStatus[presalesmanId] === 'ASSIGNED')
             
               return (
                 <div key={prevName} className="mb-6">
