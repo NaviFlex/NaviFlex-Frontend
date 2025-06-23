@@ -24,9 +24,12 @@ const centerDefault = {
   lng: -79.062921,
 };
 
-const googleMapsLibraries: (
-  "places" | "drawing" | "geometry" | "localContext" | "visualization"
-)[] = ['places'];
+//const googleMapsLibraries: (
+//  "places" | "drawing" | "geometry" | "localContext" | "visualization"
+//)[] = ['places'];
+const googleMapsLibraries = ['places'] satisfies Array<'places' | 'drawing' | 'geometry' | 'localContext' | 'visualization'>;
+
+
 
 
 export default function ViewMapsJordanian() {
