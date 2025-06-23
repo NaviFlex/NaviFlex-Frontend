@@ -28,6 +28,12 @@ export default function DriverAssignedOrders() {
 
             try{
                 const response_route_original = await obtainRouteFromDayByDriverId(user?.profileId || 0);
+                if( response_route_original.status_code === 404) {
+                    setHasRoute(false);
+                    setLoading(false);
+                    return;
+                }
+                
                 setOrdersData(response_route_original.data.coordinates);
 
                 setLoading(false);
