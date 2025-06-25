@@ -11,6 +11,18 @@ import {SpinnerComponent} from '@/components/ui/spinner';
 import { Navigation, BotMessageSquare  } from 'lucide-react';
 import { useCallback } from 'react';
 import { ApiResponse } from '@/types/shared/api_response';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay'
 
 const containerStyle = {
   width: '100%',
@@ -56,7 +68,13 @@ export default function ViewMapsJordanian() {
   const [timeWindows, setTimeWindows] = useState<any[]>([]);
   const [forceCustomer, setForceCustomer] = useState<any>(null);
   const [routeId, setRouteId] = useState<any>(null);
+  const [presalesmanId, setPresalesmanId] = useState<any>(null);
   const [updatingRoute, setUpdatingRoute] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('')
+  const [showSuccess, setShowSuccess] = useState(false)
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success')
+
+
 
   const mapRef = useRef<google.maps.Map | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -120,9 +138,6 @@ export default function ViewMapsJordanian() {
     const customEvent = event as CustomEvent;
     let { coords, nueva_ruta, restricciones } = customEvent.detail;
 
-    console.log(nueva_ruta)
-    console.log(restricciones)
-    console.log(coords)
   
     // Validar que cada coordenada tenga lat/lng numéricos
     ///coords = (coords || []).filter(
@@ -209,30 +224,31 @@ export default function ViewMapsJordanian() {
         setOriginalOrders(coords);
         setActiveOrders([...coords]);
         setRouteId(route_original_data.id)
+        setPresalesmanId(route_original_data.presalesman_id)
         // Paso 2: Obtener cambios (si existen)
-        const routeChangeRes = await getRouteChangesByRouteId(route_original_data.id);
-        const routeChanges = routeChangeRes.data;
+        //const routeChangeRes = await getRouteChangesByRouteId(route_original_data.id);
+        //const routeChanges = routeChangeRes.data;
         
         
 
        
-        let coordsFiltrados = [...coords];
-        let ordenFinal = route_original_data.stop_orders; // por defecto
+        const coordsFiltrados = [...coords];
+        const ordenFinal = route_original_data.stop_orders; // por defecto
 
-        if (routeChanges?.restrictions) {
-          const { cancelations = [], time_windows = [], force_customer = null } = routeChanges.restrictions;
-          setCancelations(cancelations);
-          setTimeWindows(time_windows);
-          setForceCustomer(force_customer);
-
-          // aplicar cancelaciones
-          coordsFiltrados = coordsFiltrados.filter(o => !cancelations.includes(o.order_id));
-
-          if (Array.isArray(routeChanges.new_stop_order) && routeChanges.new_stop_order.length > 0) {
-            ordenFinal = routeChanges.new_stop_order;
-          }
-          
-        }
+        //if (routeChanges?.restrictions) {
+        //  const { cancelations = [], time_windows = [], force_customer = null } = routeChanges.restrictions;
+        //  setCancelations(cancelations);
+        //  setTimeWindows(time_windows);
+        //  setForceCustomer(force_customer);
+//
+        //  // aplicar cancelaciones
+        //  coordsFiltrados = coordsFiltrados.filter(o => !cancelations.includes(o.order_id));
+//
+        //  if (Array.isArray(routeChanges.new_stop_order) && routeChanges.new_stop_order.length > 0) {
+        //    ordenFinal = routeChanges.new_stop_order;
+        //  }
+        //  
+        //}
 
 
         setActiveOrders(coordsFiltrados);
@@ -244,8 +260,7 @@ export default function ViewMapsJordanian() {
             document_number_client: c.document_number_client,
             latitude: c.latitude,
             longitude: c.longitude
-
-          }))
+           }))
         );
 
         // reconstruir la ruta en orden
@@ -253,9 +268,12 @@ export default function ViewMapsJordanian() {
           .map((id: number) => coordsFiltrados.find((c) => c.order_id === id))
           //.filter((x) => x); // eliminar undefined si algún punto fue cancelado
 
-        setOrderedCoords(ordered);
-
-
+          const enrichedCoords = ordered.map(coord => ({
+            ...coord,
+            status_orden: 'PENDING', // o el valor real si lo tienes de la BD
+          }));
+          
+          setOrderedCoords(enrichedCoords);
 
         const waypoints = ordered.map((c: any) => ({
           location: { lat: c.latitude, lng: c.longitude },
@@ -277,9 +295,9 @@ export default function ViewMapsJordanian() {
             if (status === 'OK' && result.routes?.length > 0) {
 
               const fullPath: google.maps.LatLng[] = [];
-              
-
-
+              //
+//
+//
               let totalDuration = 0;
               let totalDistance = 0;
             
@@ -294,7 +312,7 @@ export default function ViewMapsJordanian() {
             
               const totalMinutes = totalDuration //Math.round(totalDuration / 60);
               const totalKm =totalDistance //(totalDistance / 1000).toFixed(2); // en kilómetros con 2 decimales
-            
+            //
               console.log(`⏱️ Tiempo estimado total: ${totalMinutes} segundos`);
               console.log(`🛣️ Distancia estimada total: ${totalKm} m`);
 
@@ -339,6 +357,15 @@ export default function ViewMapsJordanian() {
 
   return (
     <>
+
+      <ErrorOverlay
+        message={successMessage}
+        show={showSuccess}
+        type={messageType}
+        onClose={() => setShowSuccess(false)}
+      />
+
+
     { loading ? (
         <SpinnerComponent />
       ) : (
@@ -424,9 +451,74 @@ export default function ViewMapsJordanian() {
                         position={{ lat: coord.latitude, lng: coord.longitude }}
                         onCloseClick={() => setActiveMarker(null)}
                       >
-                        <div className="text-sm font-medium max-w-[160px] break-words">
-                          {coord.client_name}
-                        </div>
+                          <div className="text-sm font-medium max-w-[200px] break-words">
+                            <p className="mb-2">{coord.client_name}</p>
+
+                            { coord.status_orden === 'PENDING' &&(
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button className="bg-[#7284FB] text-white hover:bg-blue-500 cursor-pointer">
+                                  ¿Pedido Entregado?
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="bg-[#7284FB] border-none rounded-[10px]">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle className="text-center text-white mb-5">
+                                      ¿Deseas confirmar que {coord.client_name} recibió su pedido?
+                                    </AlertDialogTitle>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter className="flex justify-center w-full space-x-2">
+                                    <AlertDialogCancel className="text-[#5E52FF] cursor-pointer">
+                                      Cancelar
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={async () => {
+                                        //try {
+                                        //  const result = await createOrderFromNextDay(coord.id, user?.profileId)
+
+                                          //if (result.status_code === 201) {
+                                          setMessageType('success')
+                                          setSuccessMessage(`Confirmaste la entrega de ${coord.client_name}`)
+                                          setShowSuccess(true)
+                                          setTimeout(() => setShowSuccess(false), 3000)
+                                          setActiveMarker(null)
+
+                                          setOrderedCoords(prev =>
+                                            prev.map(c =>
+                                              c.order_id === coord.order_id ? { ...c, status_orden: 'DELIVERED' } : c
+                                            )
+                                          )
+                                          console.log(orderedCoords)
+                                          //  // Actualizar estado local de orderedCoords (o como estés manejando)
+                                          //  //setOrderedCoords(prev =>
+                                          // //   prev.map(c =>
+                                          //  ////</AlertDialogFooter>    c.id === coord.id ? { ...c, order_confirmed: true } : c
+                                          // //</AlertDialogContent>   )
+                                          // // )
+                                          //} else {
+                                          //  setMessageType('error')
+                                          //  setSuccessMessage('Error al confirmar el pedido')
+                                          //  setShowSuccess(true)
+                                          //  setTimeout(() => setShowSuccess(false), 3000)
+                                          //}
+                                        //} catch (error) {
+                                        //  console.error('Error al confirmar pedido:', error)
+                                        //  setMessageType('error')
+                                        //  setSuccessMessage('Error de red al intentar confirmar el pedido')
+                                        //  setShowSuccess(true)
+                                        //  setTimeout(() => setShowSuccess(false), 3000)
+                                        //}
+                                      }}
+                                      className="bg-[#5E52FF] cursor-pointer"
+                                    >
+                                      Confirmar
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
+
                       </InfoWindow>
                     )}
                   </Marker>
@@ -459,6 +551,7 @@ export default function ViewMapsJordanian() {
                   orders={ordersData} // le pasas los datos necesarios al Chat
                   driverId={user?.profileId || 0}
                   routeId={routeId}
+                  presalesmanId= {presalesmanId}
                 />
               )}
         </div>

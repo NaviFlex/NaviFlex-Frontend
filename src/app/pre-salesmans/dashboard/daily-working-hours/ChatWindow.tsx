@@ -1,5 +1,5 @@
 'use client'
-
+import { createRouteChanges } from '@/services/presalesman/daily-working/routeManagement'
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { interpretarRestriccionesForPresalesman } from '@/utils/interpretingRestrictionsForPresalesman'
@@ -7,8 +7,9 @@ import {  SendHorizonal  } from 'lucide-react';
 import {
     connectSocket,
     registerPresalesman,
-    sendRestrictionsToDriver
-  } from '@/lib/socket'
+    sendRestrictionsToDriver,
+    listenForRestrictionsAsPresalesman
+} from '@/lib/socket'
 
 
 type Order = {
@@ -42,6 +43,7 @@ export default function ChatWindow({
   presalesmanId: number // <- added missing type for presalesmanId
 }) {
   const [customMessages, setCustomMessages] = useState<Message[]>([])
+  const [ driverName, setDriverName] = useState<string>(presaleman_name) // <- added missing state for driverName
 
   const pedidosContexto = orders
     .map(({ client_name, order_code, order_id }) =>
@@ -55,6 +57,13 @@ export default function ChatWindow({
         connectSocket()
         registerPresalesman(presalesmanId)
       }, [presalesmanId])
+
+
+    useEffect(()=>{
+      listenForRestrictionsAsPresalesman(async (data)=>{
+        addCustomMessage('assistant', `${data.message}`)
+      })
+    },[])
       
   const {
     messages,
@@ -76,15 +85,18 @@ export default function ChatWindow({
       
         Importante:
         - Si el cliente no está en los pedidos activos de hoy, solicita confirmación.
-        - Interpreta las solicitudes como restricciones y responde en formato JSON.
+        - Solo si el ususario dice algo relacionado con cancelaciones, prioridades o ventanas horarias de entrega, responde en formato JSON,
+          unicamente en formato JSON como se muestra abajo. Caso contrario, responde en un mensaje normal, en formato de texto normal.
         - También genera una versión visible para el chofer como se muestra más abajo.
-        - Usa exclusivamente los order_id.
+        - Usa exclusivamente los order_id en los JSON.
       
-        Ejemplo de respuesta:
+        Ejemplo de respuesta JSON:
       
         {
-          "message": " Se aplicaron los cambios correctamente.(O algo mas humano segun lo que creas conveniente)",
-          "message_for_driver": "🟡 El prevendedor ${presaleman_name }indicó que el cliente Fernanda Pardo – Código: ORD-XXXXXX canceló su pedido.",
+          "message": " Se aplicaron los cambios correctamente.(O algo mas humano segun lo que creas conveniente, ya que este mensaje es para el prevendedor)",
+          "message_for_driver": "El prevendedor ${ driverName }indicó que el cliente Fernanda Pardo – Código: ORD-XXXXXX canceló su pedido.",
+          "type_incidents": "(Aca colocame el tipo de incidente, si fue CANCELACION, PRIORIDAD, VENTANA DE TIEMPO, segun lo que consideres)",
+          "client_name": (Aca coloca el nombre del cliente al que se le aplico el cambio, si son mas de uno, usa un  deliminador de "|"),
           "json": {
             "cancelations": [25],
             "force_customer": 30,
@@ -96,10 +108,13 @@ export default function ChatWindow({
         En 'message', responde algo mas humanizado, como "Ya se le informo la chofer sobre tus cambios y se aplicaron" algo asi, lo
         mismo para message_for_driver.
         En cancelaciones, force_customer y la llave de time_windows_overrides, usa el id de la orden
+
+        Ese json solo es un ejemplo, el prevendedor puede pedirte cualquier tipo de restricción, como cancelaciones, prioridades o ventanas horarias de entrega.
+        Usa los IDs de las órdenes que te pasé en el contexto, y si no hay ninguno, solicita confirmación al usuario.
         
         En caso se trate de algunas de esas restricciones, responde unicamente en el formato JSON indicado, 'message'
         es el que mostrare al prevendedor, y 'message_for_driver' es el que vera el chofer, manda mensajes humanizados para esos parametros. Si el mensaje del usuario no tiene nada que ver con alguna de
-        estas restricciones, responde en mensaje normal, sin formato json, o en todo caso, si necesitas confirmar algo, preguntale en un mensaje normal.
+        estas restricciones, responde en mensaje normal, sin formato json, o en todo caso, si necesitas confirmar algo, preguntale en un mensaje normal. El pedido de este prevendedor es: ${driverName}
 
         Pedidos activos hoy: ${pedidosContexto}
       `
@@ -123,17 +138,33 @@ export default function ChatWindow({
               presaleman_name // <- nombre del prevendedor (puedes parametrizarlo después)
             )
              
-            console.log(restricciones)
 
             if (parsed.message_for_driver && driverId) {
+              console.log(restricciones)
                 sendRestrictionsToDriver(
                   driverId,
                   routeId,
                   parsed.message_for_driver,
                   restricciones
                 )
+            }
+
+            const createChangesResponse = await createRouteChanges
+            (
+              {
+                routes_id: routeId,
+                type: 1,
+                previous_stop_order: [],
+                new_stop_order: [],
+                restrictions: {
+                  type_incidents: parsed.type_incidents,
+                  client_name: parsed.client_name,
+                  reportBy: "PREVENDEDOR",
+                }  // cancelations, time_windows, etc.
               }
-              
+            )
+            console.log('📝 Respuesta de createRouteChanges:', createChangesResponse)
+
               addCustomMessage('assistant', parsed.message)
 
           } else {

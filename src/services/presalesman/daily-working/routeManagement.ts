@@ -21,3 +21,24 @@ export async function obtainRouteFromDayByPresalesmanId(
 
     return json as ApiResponse<any>;
 }
+
+
+//////////////////////////////////
+export async function createRouteChanges(
+    changes: any
+): Promise<ApiResponse<any>> {
+    
+    const res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}/routes_changes/create_route_change`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(changes)
+    });
+
+    const json = await res.json();
+
+    console.log('📝 Respuesta de createRouteChanges:', json);
+    
+    return json as ApiResponse<any>;
+}

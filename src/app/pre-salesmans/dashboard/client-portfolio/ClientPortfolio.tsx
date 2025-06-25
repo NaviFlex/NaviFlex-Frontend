@@ -22,6 +22,7 @@ import ErrorOverlay from '@/app/ui/auth/login/ErrorOverlay'
 import {createOrderFromNextDay} from '@/services/presalesman/client-portfolio/clientPortfolio'
 
 
+
 export default function ClientPortfolio() {
   const user = useUser()
   const [clientsPortfolio, setClientsPortfolio] = useState<ClientByAreaType>()

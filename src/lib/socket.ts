@@ -58,6 +58,17 @@ export const sendRestrictionsToDriver = (
   })
 }
 
+export const sendMessageToPresalesman = (
+  presalesmanId: number,
+  message:string
+) =>{
+  if (!socket) return
+  socket.emit('enviar_notificacion_presalesman', {
+    presalesman_id: presalesmanId,
+    message
+  })
+}
+
 // === ESCUCHAR MENSAJES PARA EL CHOFER ===
 export const listenForRestrictionsAsDriver = (
   callback: (data: { message: string; restricciones: any }) => void
@@ -68,10 +79,10 @@ export const listenForRestrictionsAsDriver = (
 
 // === ESCUCHAR MENSAJES PARA EL PREVENDEDOR (se deja preparado) ===
 export const listenForRestrictionsAsPresalesman = (
-  callback: (data: { message: string; restricciones: any }) => void
+  callback: (data: { message: string }) => void
 ) => {
   if (!socket) return
-  socket.on('notificacion_restricciones_prevendedor', callback)
+  socket.on('notificar_cambios_aplicados', callback)
 }
 
 // === DESCONECTAR (opcional) ===

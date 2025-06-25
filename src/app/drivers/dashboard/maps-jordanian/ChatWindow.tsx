@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef,useMemo } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { interpretarRestricciones } from '@/utils/interpretingRestrictions'
-import { reoptimize_route } from '@/services/driver/routesManagement'
+import { reoptimize_route, createRouteChanges } from '@/services/driver/routesManagement'
 import {  SendHorizonal  } from 'lucide-react';
 import { listenForRestrictionsAsDriver } from '@/lib/socket'
 
 import {
   connectSocket,
-  registerDriver
+  registerDriver,
+  sendMessageToPresalesman
 } from '@/lib/socket'
 
 type Order = {
@@ -32,11 +33,13 @@ export default function ChatWindow({
   orders,
   driverId,
   routeId,
+  presalesmanId
 }: {
   onClose: () => void
   orders: Order[]
   driverId: number
   routeId: number
+  presalesmanId: number
 }) {
   const [customMessages, setCustomMessages] = useState<Message[]>([])
 
@@ -138,6 +141,9 @@ export default function ChatWindow({
 
                 {
                   "message": " XXX",
+                  "message_for_presalesman": "(Aca pon un mensaje de los tipos de incidencia o el tipo, en  caso solo sea uno, este mensaje lo vera el prevendedor, y ademas , espeficica el nombre y codigo del cliente)"
+                  "type_incidents": "(Aca colocame el tipo de incidente, si fue CANCELACION, PRIORIDAD, VENTANA DE TIEMPO, segun lo que consideres)",
+                  "client_name": (Aca coloca el nombre del cliente al que se le aplico el cambio, si son mas de uno, usa un  deliminador de "|"),
                   "json": {
                     "cancelations": [25],
                     "force_customer": 30,
@@ -146,6 +152,8 @@ export default function ChatWindow({
                     }
                   }
                 }
+
+            El json que te di solo es un ejemplo, usa los ids de los pedidos que el usuario te indique, y si no te indica un pedido, no lo incluyas en el JSON.
             Caso contrario, responde como un asistente normal, sin texto complicado ni en formato json.      
 
 
@@ -197,6 +205,30 @@ export default function ChatWindow({
                     }
                   })
                 );
+
+                sendMessageToPresalesman(
+                  presalesmanId,
+                  parsed.message_for_presalesman
+                )
+
+                const createChangesResponse = await createRouteChanges
+                (
+                  {
+                    routes_id: routeId,
+                    type: 1,
+                    previous_stop_order: [],
+                    new_stop_order: [],
+                    restrictions: {
+                      type_incidents: parsed.type_incidents,
+                      client_name: parsed.client_name,
+                      reportBy: "CHOFER"
+                    }  // cancelations, time_windows, etc.
+                  }
+                )
+
+                console.log('📝 Respuesta de createRouteChanges:', createChangesResponse)
+
+
               } else {
                 addCustomMessage('assistant', '❌ No fue posible aplicar la restricción.');
               }
