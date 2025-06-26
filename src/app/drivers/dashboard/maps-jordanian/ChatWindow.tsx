@@ -153,7 +153,6 @@ export default function ChatWindow({
                   }
                 }
 
-            El json que te di solo es un ejemplo, usa los ids de los pedidos que el usuario te indique, y si no te indica un pedido, no lo incluyas en el JSON.
             Caso contrario, responde como un asistente normal, sin texto complicado ni en formato json.      
 
 
