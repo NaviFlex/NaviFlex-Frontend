@@ -116,6 +116,7 @@ export default function ChatWindow({
         es el que mostrare al prevendedor, y 'message_for_driver' es el que vera el chofer, manda mensajes humanizados para esos parametros. Si el mensaje del usuario no tiene nada que ver con alguna de
         estas restricciones, responde en mensaje normal, sin formato json, o en todo caso, si necesitas confirmar algo, preguntale en un mensaje normal. El pedido de este prevendedor es: ${driverName}
 
+        No incluyas texto normal en el JSON, solo el JSON segun sea el caso, y si no es el caso, responde en un mensaje normal.
         Pedidos activos hoy: ${pedidosContexto}
       `
       
@@ -208,10 +209,10 @@ export default function ChatWindow({
   }, [messages, customMessages])
 
   return (
-    <div className="fixed bottom-20 right-6 w-[360px] h-[500px] bg-white rounded-lg shadow-lg z-50 flex flex-col border">
-      <div className="flex justify-between items-center p-3 border-b bg-[#5E52FF]">
+    <div className="fixed bottom-20 right-6 w-[360px] h-[500px] border-none bg-white rounded-[12px] shadow-lg z-50 flex flex-col  mr-5 mb-5">
+      <div className="flex justify-between items-center rounded-t-[12px] p-3 border-b bg-[#5E52FF]">
         <h2 className="font-semibold w-full text-white text-center">NaviGPT</h2>
-        <button onClick={onClose} className="text-white hover:text-gray-700">✕</button>
+        <button onClick={onClose} className="text-white hover:text-gray-700  cursor-pointer">✕</button>
       </div>
 
       <div className="flex-1 p-3 overflow-y-auto text-sm space-y-2 bg-[#5E52FF]">
@@ -252,7 +253,7 @@ export default function ChatWindow({
             originalHandleSubmit(e)
           }
         }}
-        className="p-3 border-t flex gap-2 bg-[#5E52FF] flex items-center"
+        className="p-3 border-t flex  rounded-b-[12px] gap-2 bg-[#5E52FF]  flex items-center"
       >
         <input
           value={input}
@@ -261,9 +262,9 @@ export default function ChatWindow({
           placeholder="Escribe una instrucción..."
         />
 
-        <SendHorizonal type="submit" className="text-white font-semibold"
-          
-        />
+      <button type="submit" className="text-white font-semibold p-2 hover:bg-[#4a42d4] rounded cursor-pointer transition-colors">
+                <SendHorizonal className="w-5 h-5" />
+      </button>
 
       </form>
     </div>

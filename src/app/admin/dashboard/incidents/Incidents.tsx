@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/button'
 import { useUser } from '@/hooks/useUser';
 import { useEffect, useState } from 'react'
 import {getChangesRouteByAdminIdAndCurrentDay} from '@/services/admin/changesRouting/changesRoutesManagementService'
-
+import { useRouter } from 'next/navigation'
 
 
 export default function Incidents() {
 
   const [incidentsData, setIncidentsData] = useState<any[]>([])
-
+  const router = useRouter()
     const user = useUser()
     useEffect(() => {
 
@@ -54,7 +54,9 @@ export default function Incidents() {
 
 
       <div className="flex justify-end sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 mb-2">
-          <Button className="bg-[#7284FB] text-white hover:bg-blue-500 text-sm cursor-pointer">Rutas de la jornada</Button>
+          <Button className="bg-[#7284FB] text-white hover:bg-blue-500 text-sm cursor-pointer"
+            onClick={() => router.push('/admin/dashboard/incidents/incidents-by-drivers')}>
+          Rutas de la jornada</Button>
         </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm text-left">

@@ -41,7 +41,7 @@ export default function SideNav({ onCloseMobile }: { onCloseMobile?: () => void 
             localStorage.removeItem('userData');
             router.push('/auth/login');
           }}
-          className="flex items-center gap-2 text-sm text-indigo-700 hover:text-white transition-all"
+          className="flex items-center gap-2 text-sm text-[#5E52FF] hover:text-[#5E52FF] transition-all cursor-pointer"
         >
           <ArrowRightStartOnRectangleIcon className="h-5 w-5" />
           Cerrar sesión

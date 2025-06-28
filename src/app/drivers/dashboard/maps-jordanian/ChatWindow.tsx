@@ -153,7 +153,7 @@ export default function ChatWindow({
                   }
                 }
 
-            Caso contrario, responde como un asistente normal, sin texto complicado ni en formato json.      
+            Ese JSON es solo un ejemplo, usa los Ids de las ordenes reales que te pase en el contexto. Caso contrario, responde como un asistente normal, sin texto complicado ni en formato json.      
 
 
             Pedidos activos hoy (solo contexto interno, no imprimir,cada pedido esta delimitado por una coma ","): ${pedidosContexto}
@@ -281,10 +281,10 @@ export default function ChatWindow({
     }, [combinedMessages])
 
   return (
-    <div className="fixed bottom-20 right-6 w-[360px] h-[500px] bg-white rounded-lg shadow-lg z-50 flex flex-col border">
-      <div className="flex justify-between items-center p-3 border-b bg-[#5E52FF]">
+    <div className="fixed bottom-20 right-6 w-[360px] h-[500px] border-none  bg-white rounded-[12px] shadow-lg z-50 flex flex-col  mr-5 mb-5">
+      <div className="flex justify-between items-center rounded-t-[12px] p-3 border-b bg-[#5E52FF]">
         <h2 className="font-semibold w-full text-white text-center">NaviGPT</h2>
-        <button onClick={onClose} className="text-white hover:text-gray-700">✕</button>
+        <button onClick={onClose} className="text-white hover:text-gray-700 cursor-pointer">✕</button>
       </div>
 
       <div className="flex-1 p-3 overflow-y-auto text-sm space-y-2 bg-[#5E52FF]">
@@ -324,7 +324,7 @@ export default function ChatWindow({
             originalHandleSubmit(e);
           }
         }}
-        className="p-3 border-t flex gap-2 bg-[#5E52FF] flex items-center"
+        className="p-3 border-t rounded-b-[12px] flex gap-2 bg-[#5E52FF] flex items-center"
       >
         <input
           value={input}
@@ -333,7 +333,9 @@ export default function ChatWindow({
           placeholder="Escribe una instrucción..."
         />
 
-        <SendHorizonal type="submit" className="text-white font-semibold" />
+      <button type="submit" className="text-white font-semibold p-2 hover:bg-[#4a42d4] rounded cursor-pointer transition-colors">
+          <SendHorizonal className="w-5 h-5" />
+        </button>
       </form>
     </div>
   );
